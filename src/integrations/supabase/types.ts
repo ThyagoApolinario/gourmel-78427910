@@ -14,7 +14,170 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categorias_receita: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      composicao_receita: {
+        Row: {
+          created_at: string
+          fator_rendimento: number
+          id: string
+          insumo_id: string
+          quantidade: number
+          receita_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          fator_rendimento?: number
+          id?: string
+          insumo_id: string
+          quantidade: number
+          receita_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          fator_rendimento?: number
+          id?: string
+          insumo_id?: string
+          quantidade?: number
+          receita_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "composicao_receita_insumo_id_fkey"
+            columns: ["insumo_id"]
+            isOneToOne: false
+            referencedRelation: "insumos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "composicao_receita_receita_id_fkey"
+            columns: ["receita_id"]
+            isOneToOne: false
+            referencedRelation: "receitas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insumos: {
+        Row: {
+          categoria: Database["public"]["Enums"]["categoria_insumo"]
+          created_at: string
+          custo_unitario: number | null
+          fornecedor: string | null
+          id: string
+          marca: string | null
+          nome: string
+          peso_volume_embalagem: number
+          preco_compra: number
+          unidade_medida: Database["public"]["Enums"]["unidade_medida"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          categoria?: Database["public"]["Enums"]["categoria_insumo"]
+          created_at?: string
+          custo_unitario?: number | null
+          fornecedor?: string | null
+          id?: string
+          marca?: string | null
+          nome: string
+          peso_volume_embalagem: number
+          preco_compra: number
+          unidade_medida?: Database["public"]["Enums"]["unidade_medida"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          categoria?: Database["public"]["Enums"]["categoria_insumo"]
+          created_at?: string
+          custo_unitario?: number | null
+          fornecedor?: string | null
+          id?: string
+          marca?: string | null
+          nome?: string
+          peso_volume_embalagem?: number
+          preco_compra?: number
+          unidade_medida?: Database["public"]["Enums"]["unidade_medida"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      receitas: {
+        Row: {
+          categoria_id: string | null
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          rendimento_quantidade: number | null
+          rendimento_unidade: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          categoria_id?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          rendimento_quantidade?: number | null
+          rendimento_unidade?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          categoria_id?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          rendimento_quantidade?: number | null
+          rendimento_unidade?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receitas_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias_receita"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +186,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      categoria_insumo: "ingrediente" | "embalagem"
+      unidade_medida: "g" | "kg" | "ml" | "l" | "un"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +314,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      categoria_insumo: ["ingrediente", "embalagem"],
+      unidade_medida: ["g", "kg", "ml", "l", "un"],
+    },
   },
 } as const
