@@ -11,6 +11,7 @@ import logoGourmel from '@/assets/Logo_Gourmel.jpeg';
 
 export default function Auth() {
   const { signIn, signUp, resetPassword } = useAuth();
+  // Note: Auth page doesn't use useProfile to avoid circular dependency before login
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -70,8 +71,8 @@ export default function Auth() {
           <div className="mx-auto mb-3 flex items-center justify-center">
             <img src={logoGourmel} alt="Gourmel Logo" className="h-28 w-28 object-contain" />
           </div>
-          <CardTitle className="text-2xl">Gourmel Doce Gestão</CardTitle>
-          <CardDescription>Sistema de gestão para confeitaria artesanal</CardDescription>
+          <CardTitle className="text-2xl font-['Poppins']">Gourmel Pet</CardTitle>
+          <CardDescription>Confeitaria canina natural — sem glúten, sem corantes 🐾</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login">
