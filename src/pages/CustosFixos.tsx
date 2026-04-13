@@ -59,6 +59,7 @@ interface CustoFixo {
 export default function CustosFixos() {
   const { user } = useAuth();
   const { profile } = useProfile();
+  const { isAdmin } = useIsAdmin();
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -72,13 +73,16 @@ export default function CustosFixos() {
 
   // Fetch custos fixos
   const { data: custos = [] } = useQuery({
-    queryKey: ['custos_fixos', user?.id],
+    queryKey: ['custos_fixos', user?.id, isAdmin],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('custos_fixos')
         .select('*')
-        .eq('user_id', user!.id)
         .order('categoria', { ascending: true });
+      if (!isAdmin) {
+        query = query.eq('user_id', user!.id);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data as CustoFixo[];
     },
