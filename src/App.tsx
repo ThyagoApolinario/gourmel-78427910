@@ -42,6 +42,7 @@ function ProtectedRoutes() {
       <Route path="/receitas" element={<Receitas />} />
       <Route path="/vendas" element={<Vendas />} />
       <Route path="/relatorio" element={<RelatorioMensal />} />
+      <Route path="/custos-fixos" element={<CustosFixos />} />
       <Route path="/categorias" element={<Categorias />} />
       <Route path="/configuracoes" element={<Configuracoes />} />
       <Route path="/dashboard" element={<Dashboard />} />
