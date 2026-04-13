@@ -13,6 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import { formatarCusto } from '@/lib/smart-units';
 import { Plus, Pencil, Trash2, Package } from 'lucide-react';
 import { OnboardingChecklist } from '@/components/OnboardingChecklist';
+import HeroBanner from '@/components/HeroBanner';
+import { useProfile } from '@/hooks/useProfile';
 
 interface Insumo {
   id: string;
