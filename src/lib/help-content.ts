@@ -5,7 +5,7 @@ export interface HelpTopic {
   titulo: string;
   resumo: string;
   conteudo: string;
-  categoria: 'insumos' | 'precificacao' | 'bi' | 'geral';
+  categoria: 'insumos' | 'precificacao' | 'bi' | 'geral' | 'dicas';
 }
 
 export const HELP_TOOLTIPS: Record<string, string> = {
