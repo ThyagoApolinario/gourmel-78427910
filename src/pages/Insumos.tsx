@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { formatarCusto } from '@/lib/smart-units';
-import { Plus, Pencil, Trash2, Package } from 'lucide-react';
+import { Plus, Pencil, Trash2, Package, Search } from 'lucide-react';
 import { OnboardingChecklist } from '@/components/OnboardingChecklist';
 import HeroBanner from '@/components/HeroBanner';
 import { useProfile } from '@/hooks/useProfile';
@@ -35,6 +35,7 @@ export default function Insumos() {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Insumo | null>(null);
+  const [busca, setBusca] = useState('');
   const { labels } = useProfile();
 
   const { data: insumos = [], isLoading } = useQuery({
@@ -104,8 +105,12 @@ export default function Insumos() {
     onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
   });
 
-  const ingredientes = insumos.filter(i => i.categoria === 'ingrediente');
-  const embalagens = insumos.filter(i => i.categoria === 'embalagem');
+  const buscaLower = busca.toLowerCase();
+  const insumosFiltrados = busca
+    ? insumos.filter(i => i.nome.toLowerCase().includes(buscaLower) || i.marca?.toLowerCase().includes(buscaLower) || i.fornecedor?.toLowerCase().includes(buscaLower))
+    : insumos;
+  const ingredientes = insumosFiltrados.filter(i => i.categoria === 'ingrediente');
+  const embalagens = insumosFiltrados.filter(i => i.categoria === 'embalagem');
 
   return (
     <AppLayout>
@@ -123,6 +128,18 @@ export default function Insumos() {
             </Button>
           )}
         </div>
+
+        {!showForm && !editing && insumos.length > 0 && (
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por nome, marca ou fornecedor..."
+              value={busca}
+              onChange={e => setBusca(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+        )}
 
         {(showForm || editing) && (
           <InsumoForm
