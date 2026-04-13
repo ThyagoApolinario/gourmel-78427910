@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { formatarCusto } from '@/lib/smart-units';
-import { Plus, Trash2, BookOpen, Calculator, Package, CakeSlice, Clock } from 'lucide-react';
+import { Plus, Trash2, BookOpen, Calculator, Package, CakeSlice, Clock, Scale, Cookie } from 'lucide-react';
 import { PrecificacaoCard } from '@/components/PrecificacaoCard';
 import { HelpTooltip } from '@/components/HelpTooltip';
 
@@ -61,7 +61,7 @@ export default function Receitas() {
   const [formDescricao, setFormDescricao] = useState('');
   const [formCategoriaId, setFormCategoriaId] = useState('');
   const [formRendQtd, setFormRendQtd] = useState('');
-  const [formRendUn, setFormRendUn] = useState('');
+  const [formRendUn, setFormRendUn] = useState('un');
   const [formTempoMin, setFormTempoMin] = useState('');
 
   // Composição form
@@ -117,7 +117,7 @@ export default function Receitas() {
         descricao: formDescricao || null,
         categoria_id: formCategoriaId || null,
         rendimento_quantidade: formRendQtd ? parseFloat(formRendQtd) : null,
-        rendimento_unidade: formRendUn || null,
+        rendimento_unidade: formRendUn || 'un',
         tempo_producao_minutos: formTempoMin ? parseFloat(formTempoMin) : null,
       });
       if (error) throw error;
@@ -125,7 +125,7 @@ export default function Receitas() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['receitas'] });
       setShowReceitaForm(false);
-      setFormNome(''); setFormDescricao(''); setFormCategoriaId(''); setFormRendQtd(''); setFormRendUn(''); setFormTempoMin('');
+      setFormNome(''); setFormDescricao(''); setFormCategoriaId(''); setFormRendQtd(''); setFormRendUn('un'); setFormTempoMin('');
       toast({ title: 'Receita criada!' });
     },
     onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
@@ -188,6 +188,9 @@ export default function Receitas() {
   const custoTotal = custoIngredientes + custoEmbalagens;
 
   const receitaSelecionada = receitas.find(r => r.id === selectedReceita);
+  const rendUnidade = receitaSelecionada?.rendimento_unidade || 'un';
+  const isGramas = rendUnidade === 'g';
+  const custoLabel = isGramas ? 'Custo/Grama' : 'Custo/Unidade';
   const custoPorUnidade = receitaSelecionada?.rendimento_quantidade
     ? custoTotal / receitaSelecionada.rendimento_quantidade
     : null;
@@ -235,13 +238,30 @@ export default function Receitas() {
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-2">
                       <Label className="flex items-center gap-1.5">Rendimento <HelpTooltip field="rendimento" /></Label>
-                      <Input type="number" value={formRendQtd} onChange={e => setFormRendQtd(e.target.value)} placeholder="Ex: 12" />
+                      <Input type="number" step="0.01" value={formRendQtd} onChange={e => setFormRendQtd(e.target.value)} placeholder={formRendUn === 'g' ? 'Ex: 500' : 'Ex: 12'} />
                     </div>
                     <div className="space-y-2">
                       <Label>Unidade</Label>
-                      <Input value={formRendUn} onChange={e => setFormRendUn(e.target.value)} placeholder="fatias" />
+                      <Select value={formRendUn} onValueChange={setFormRendUn}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="un">
+                            <span className="flex items-center gap-1.5"><Cookie className="h-3.5 w-3.5" /> Unidades (un)</span>
+                          </SelectItem>
+                          <SelectItem value="g">
+                            <span className="flex items-center gap-1.5"><Scale className="h-3.5 w-3.5" /> Gramas (g)</span>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
+                  {formRendUn === 'g' && (
+                    <p className="text-[10px] text-muted-foreground md:col-span-2">
+                      ⚖️ Ao vender por peso, o custo será calculado <strong>por grama</strong>. Ideal para biscoitos vendidos a granel!
+                    </p>
+                  )}
                   <div className="space-y-2">
                     <Label className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Tempo de Produção (min) <HelpTooltip field="tempo_producao" /></Label>
                     <Input type="number" min="0" value={formTempoMin} onChange={e => setFormTempoMin(e.target.value)} placeholder="Ex: 120" />
@@ -275,7 +295,10 @@ export default function Receitas() {
                       {r.descricao && <p className="text-sm text-muted-foreground truncate">{r.descricao}</p>}
                       <div className="flex items-center gap-2 mt-1">
                         {r.rendimento_quantidade && (
-                          <span className="text-xs text-muted-foreground">Rende: {r.rendimento_quantidade} {r.rendimento_unidade}</span>
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            {r.rendimento_unidade === 'g' ? <Scale className="h-3 w-3" /> : <Cookie className="h-3 w-3" />}
+                            Rende: {r.rendimento_quantidade} {r.rendimento_unidade === 'g' ? 'g' : 'un'}
+                          </span>
                         )}
                         {r.margem_desejada && (
                           <Badge variant="secondary" className="text-[10px]">Margem: {r.margem_desejada}%</Badge>
@@ -323,8 +346,10 @@ export default function Receitas() {
                     <p className="font-bold text-lg text-primary">{formatarCusto(custoTotal)}</p>
                   </div>
                   <div className="text-center p-2 rounded-lg bg-card">
-                    <p className="text-xs text-muted-foreground">Custo/Unidade</p>
-                    <p className="font-bold text-lg">{custoPorUnidade ? formatarCusto(custoPorUnidade) : '—'}</p>
+                    <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                      {isGramas ? <Scale className="h-3 w-3" /> : <Cookie className="h-3 w-3" />} {custoLabel}
+                    </p>
+                    <p className="font-bold text-lg">{custoPorUnidade ? (isGramas ? `R$ ${custoPorUnidade.toFixed(4).replace('.', ',')}` : formatarCusto(custoPorUnidade)) : '—'}</p>
                   </div>
                 </div>
               </CardContent>
@@ -336,6 +361,7 @@ export default function Receitas() {
               custoEmbalagens={custoEmbalagens}
               tempoProducao={receitaSelecionada.tempo_producao_minutos}
               rendimentoQuantidade={receitaSelecionada.rendimento_quantidade}
+              rendimentoUnidade={receitaSelecionada.rendimento_unidade}
               receitaId={receitaSelecionada.id}
               margemSalva={receitaSelecionada.margem_desejada}
             />
