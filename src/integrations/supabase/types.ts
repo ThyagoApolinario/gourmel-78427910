@@ -243,6 +243,7 @@ export type Database = {
       }
       vendas: {
         Row: {
+          canal_venda: string
           created_at: string
           data_venda: string
           id: string
@@ -253,6 +254,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          canal_venda?: string
           created_at?: string
           data_venda?: string
           id?: string
@@ -263,6 +265,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          canal_venda?: string
           created_at?: string
           data_venda?: string
           id?: string
