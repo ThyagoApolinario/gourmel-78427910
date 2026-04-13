@@ -323,6 +323,14 @@ export default function Receitas() {
               </CardContent>
             </Card>
 
+            {/* Motor de Precificação */}
+            <PrecificacaoCard
+              custoInsumos={custoIngredientes}
+              custoEmbalagens={custoEmbalagens}
+              tempoProducao={receitaSelecionada.tempo_producao_minutos}
+              rendimentoQuantidade={receitaSelecionada.rendimento_quantidade}
+            />
+
             {/* Adicionar item */}
             <Card>
               <CardHeader className="pb-3">
