@@ -365,7 +365,7 @@ export default function Receitas() {
                     <Input type="number" step="0.01" min="0" value={addQtd} onChange={e => setAddQtd(e.target.value)} placeholder="0" required />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs">Fator Rend.</Label>
+                    <Label className="text-xs flex items-center gap-1">Fator Rend. <HelpTooltip field="fator_rendimento" /></Label>
                     <div className="flex gap-2">
                       <Input type="number" step="0.01" min="0.01" max="2" value={addFator} onChange={e => setAddFator(e.target.value)} placeholder="1.0" />
                       <Button type="submit" disabled={!addInsumoId || addComposicaoMutation.isPending} size="icon" className="shrink-0">
