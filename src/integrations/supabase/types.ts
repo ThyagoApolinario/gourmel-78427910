@@ -89,6 +89,42 @@ export type Database = {
           },
         ]
       }
+      configuracoes_financeiras: {
+        Row: {
+          created_at: string
+          horas_mes: number
+          id: string
+          impostos: number
+          margem_desejada: number
+          pro_labore: number
+          taxa_cartao: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          horas_mes?: number
+          id?: string
+          impostos?: number
+          margem_desejada?: number
+          pro_labore?: number
+          taxa_cartao?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          horas_mes?: number
+          id?: string
+          impostos?: number
+          margem_desejada?: number
+          pro_labore?: number
+          taxa_cartao?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       insumos: {
         Row: {
           categoria: Database["public"]["Enums"]["categoria_insumo"]
@@ -143,6 +179,7 @@ export type Database = {
           nome: string
           rendimento_quantidade: number | null
           rendimento_unidade: string | null
+          tempo_producao_minutos: number | null
           updated_at: string
           user_id: string
         }
@@ -154,6 +191,7 @@ export type Database = {
           nome: string
           rendimento_quantidade?: number | null
           rendimento_unidade?: string | null
+          tempo_producao_minutos?: number | null
           updated_at?: string
           user_id: string
         }
@@ -165,6 +203,7 @@ export type Database = {
           nome?: string
           rendimento_quantidade?: number | null
           rendimento_unidade?: string | null
+          tempo_producao_minutos?: number | null
           updated_at?: string
           user_id?: string
         }
