@@ -1,12 +1,14 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { AppLayout } from '@/components/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import { formatarCusto } from '@/lib/smart-units';
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -14,7 +16,7 @@ import {
 } from 'recharts';
 import {
   Star, Zap, Puzzle, Dog, BarChart3, AlertTriangle, Clock, TrendingUp,
-  ChevronDown, ChevronUp,
+  ChevronDown, ChevronUp, Target, Wallet,
 } from 'lucide-react';
 import { subDays, parseISO, isAfter } from 'date-fns';
 
@@ -121,6 +123,7 @@ const PERIODOS = [
 ];
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const [periodo, setPeriodo] = useState('90');
   const [expandedQuadrante, setExpandedQuadrante] = useState<Quadrante | null>(null);
 
@@ -161,6 +164,20 @@ export default function Dashboard() {
       if (error) throw error;
       return data as ConfigFinanceira | null;
     },
+  });
+
+  // Custos fixos for breakeven bar
+  const { data: custosFixos = [] } = useQuery({
+    queryKey: ['custos_fixos_dashboard', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('custos_fixos')
+        .select('valor_mensal, percentual_rateio')
+        .eq('user_id', user!.id);
+      if (error) throw error;
+      return data as { valor_mensal: number; percentual_rateio: number }[];
+    },
+    enabled: !!user,
   });
 
   // Filtered vendas by period
@@ -433,6 +450,48 @@ export default function Dashboard() {
                 </AlertDescription>
               </Alert>
             )}
+
+            {/* Breakeven Progress */}
+            {(() => {
+              const custoFixoTotal = custosFixos.reduce((s, c) => s + (c.valor_mensal * c.percentual_rateio / 100), 0);
+              if (custoFixoTotal <= 0 || mediaMargem <= 0) return null;
+              const margemPctMedia = mediaMargem > 0 && produtos.length > 0
+                ? produtos.reduce((s, p) => s + (p.margemContribuicao / (p.precoMedioVenda || 1)), 0) / produtos.length
+                : 0;
+              if (margemPctMedia <= 0) return null;
+              const breakevenReais = custoFixoTotal / margemPctMedia;
+              const faturamentoTotal = vendasFiltradas.reduce((s, v) => s + v.preco_venda * v.quantidade, 0);
+              const progressoPct = Math.min((faturamentoTotal / breakevenReais) * 100, 100);
+              return (
+                <Card className="border-accent/20">
+                  <CardContent className="p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Target className="h-4 w-4 text-accent" />
+                        <span className="text-sm font-semibold">Cobertura de Custos Fixos</span>
+                      </div>
+                      <a href="/custos-fixos" className="text-xs text-primary hover:underline flex items-center gap-1">
+                        <Wallet className="h-3 w-3" /> Gerenciar
+                      </a>
+                    </div>
+                    <Progress value={progressoPct} className="h-3" />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>
+                        R$ {faturamentoTotal.toFixed(2).replace('.', ',')} vendidos
+                      </span>
+                      <span>
+                        Meta: R$ {breakevenReais.toFixed(2).replace('.', ',')}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">
+                      {progressoPct >= 100
+                        ? '🎉 Custos fixos cobertos! A partir daqui é lucro real no bolso.'
+                        : `Falta ${(100 - progressoPct).toFixed(0)}% para cobrir R$ ${custoFixoTotal.toFixed(2).replace('.', ',')} de custos fixos mensais`}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })()}
 
             {/* Strategy Cards */}
             <div className="space-y-3">
