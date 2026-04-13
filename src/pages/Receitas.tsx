@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,11 +12,39 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { formatarCusto } from '@/lib/smart-units';
-import { Plus, Trash2, BookOpen, Calculator, Package, CakeSlice, Clock, Scale, Cookie } from 'lucide-react';
+import { Plus, Trash2, BookOpen, Calculator, Package, CakeSlice, Clock, Scale, Cookie, AlertTriangle } from 'lucide-react';
 import { PrecificacaoCard } from '@/components/PrecificacaoCard';
 import { HelpTooltip } from '@/components/HelpTooltip';
+
+type UnidadeMedida = 'g' | 'kg' | 'ml' | 'l' | 'un';
+
+// Conversion factor: how many "from" units fit in one "to" unit
+function getConversionFactor(insumoUnit: UnidadeMedida, receitaUnit: UnidadeMedida): number | null {
+  // Same unit = no conversion
+  if (insumoUnit === receitaUnit) return 1;
+
+  const conversions: Record<string, number> = {
+    'kg->g': 1000,
+    'g->kg': 0.001,
+    'l->ml': 1000,
+    'ml->l': 0.001,
+  };
+
+  const key = `${insumoUnit}->${receitaUnit}`;
+  return conversions[key] ?? null; // null = incompatible
+}
+
+function areUnitsCompatible(a: UnidadeMedida, b: UnidadeMedida): boolean {
+  if (a === b) return true;
+  const weight: UnidadeMedida[] = ['g', 'kg'];
+  const volume: UnidadeMedida[] = ['ml', 'l'];
+  if (weight.includes(a) && weight.includes(b)) return true;
+  if (volume.includes(a) && volume.includes(b)) return true;
+  return false;
+}
 
 interface Insumo {
   id: string;
