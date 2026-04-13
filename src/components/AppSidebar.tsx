@@ -1,4 +1,5 @@
-import { Package, BookOpen, CakeSlice, LogOut, Tags } from 'lucide-react';
+import { Package, BookOpen, LogOut, Tags } from 'lucide-react';
+import logoGourmel from '@/assets/Logo_Gourmel.jpeg';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
