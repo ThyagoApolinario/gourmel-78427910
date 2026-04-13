@@ -10,7 +10,9 @@ import Receitas from "./pages/Receitas";
 import Categorias from "./pages/Categorias";
 import Configuracoes from "./pages/Configuracoes";
 import Dashboard from "./pages/Dashboard";
+import Perfil from "./pages/Perfil";
 import NotFound from "./pages/NotFound";
+import { useSessionGuard } from "./hooks/useSessionGuard";
 
 const queryClient = new QueryClient();
 
