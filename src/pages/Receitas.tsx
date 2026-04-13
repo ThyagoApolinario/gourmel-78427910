@@ -418,6 +418,7 @@ export default function Receitas() {
                   </CardContent>
                 </Card>
               ))}
+              </div>
             </div>
           )
         )}
