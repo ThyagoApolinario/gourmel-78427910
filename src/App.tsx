@@ -18,6 +18,7 @@ const queryClient = new QueryClient();
 
 function ProtectedRoutes() {
   const { user, loading } = useAuth();
+  useSessionGuard();
 
   if (loading) {
     return (
@@ -36,6 +37,7 @@ function ProtectedRoutes() {
       <Route path="/categorias" element={<Categorias />} />
       <Route path="/configuracoes" element={<Configuracoes />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/perfil" element={<Perfil />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

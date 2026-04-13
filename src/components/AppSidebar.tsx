@@ -1,4 +1,4 @@
-import { Package, BookOpen, LogOut, Tags, Settings, BarChart3 } from 'lucide-react';
+import { Package, BookOpen, LogOut, Tags, Settings, BarChart3, UserCircle } from 'lucide-react';
 import logoGourmel from '@/assets/Logo_Gourmel.jpeg';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
