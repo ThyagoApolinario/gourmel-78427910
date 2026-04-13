@@ -213,9 +213,11 @@ export function PrecificacaoCard({
                   <p className="font-bold text-lg sm:text-xl text-success">{formatarCusto(precoSugerido)}</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">Preço/Unidade</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground flex items-center justify-center gap-1">
+                    {isGramas ? <Scale className="h-3 w-3" /> : <Cookie className="h-3 w-3" />} Preço/{unLabel}
+                  </p>
                   <p className="font-bold text-base sm:text-lg">
-                    {precoSugeridoPorUnidade ? formatarCusto(precoSugeridoPorUnidade) : '—'}
+                    {precoSugeridoPorUnidade ? (isGramas ? `R$ ${precoSugeridoPorUnidade.toFixed(4).replace('.', ',')}` : formatarCusto(precoSugeridoPorUnidade)) : '—'}
                   </p>
                 </div>
                 <div className="text-center">
@@ -223,13 +225,13 @@ export function PrecificacaoCard({
                     <Target className="h-3 w-3" /> Ponto Equilíbrio
                   </p>
                   <p className="font-bold text-base sm:text-lg">
-                    {pontoEquilibrio ? `${pontoEquilibrio.toFixed(1)} un` : '—'}
+                    {pontoEquilibrio ? `${pontoEquilibrio.toFixed(1)} ${unAbrev}` : '—'}
                   </p>
                 </div>
                 <div className="text-center">
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">Lucro/Unidade</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Lucro/{unLabel}</p>
                   <p className={`font-bold text-base sm:text-lg ${lucroLiquidoPorUnidade && lucroLiquidoPorUnidade > 0 ? 'text-success' : 'text-destructive'}`}>
-                    {lucroLiquidoPorUnidade ? formatarCusto(lucroLiquidoPorUnidade) : '—'}
+                    {lucroLiquidoPorUnidade ? (isGramas ? `R$ ${lucroLiquidoPorUnidade.toFixed(4).replace('.', ',')}` : formatarCusto(lucroLiquidoPorUnidade)) : '—'}
                   </p>
                 </div>
               </div>
