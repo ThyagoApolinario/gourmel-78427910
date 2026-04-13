@@ -300,7 +300,6 @@ export default function Receitas() {
                             Rende: {r.rendimento_quantidade} {r.rendimento_unidade === 'g' ? 'g' : 'un'}
                           </span>
                         )}
-                        )}
                         {r.margem_desejada && (
                           <Badge variant="secondary" className="text-[10px]">Margem: {r.margem_desejada}%</Badge>
                         )}
