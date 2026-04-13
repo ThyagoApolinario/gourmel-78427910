@@ -295,7 +295,11 @@ export default function Receitas() {
                       {r.descricao && <p className="text-sm text-muted-foreground truncate">{r.descricao}</p>}
                       <div className="flex items-center gap-2 mt-1">
                         {r.rendimento_quantidade && (
-                          <span className="text-xs text-muted-foreground">Rende: {r.rendimento_quantidade} {r.rendimento_unidade}</span>
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            {r.rendimento_unidade === 'g' ? <Scale className="h-3 w-3" /> : <Cookie className="h-3 w-3" />}
+                            Rende: {r.rendimento_quantidade} {r.rendimento_unidade === 'g' ? 'g' : 'un'}
+                          </span>
+                        )}
                         )}
                         {r.margem_desejada && (
                           <Badge variant="secondary" className="text-[10px]">Margem: {r.margem_desejada}%</Badge>
