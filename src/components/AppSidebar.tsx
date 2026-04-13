@@ -35,7 +35,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>
             <div className="flex items-center gap-2">
-              <img src={logoGourmel} alt="Gourmel" className="h-6 w-6 rounded-full object-cover" />
+              <img src={logoGourmel} alt="Gourmel" className="h-7 w-7 object-contain" />
               {!collapsed && <span className="font-semibold">Gourmel Doce Gestão</span>}
             </div>
           </SidebarGroupLabel>
