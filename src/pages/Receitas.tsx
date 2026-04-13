@@ -229,11 +229,25 @@ export default function Receitas() {
     onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
   });
 
-  // Cost calculations
+  // Cost calculations with unit conversion
   const calcItemCost = (c: Composicao) => {
-    const custoUn = c.insumo?.custo_unitario ?? 0;
+    const custoUn = c.insumo?.custo_unitario ?? 0; // cost per insumo unit (e.g. per g, per ml)
+    const insumoUnit = (c.insumo?.unidade_medida ?? 'g') as UnidadeMedida;
+    const receitaUnit = c.unidade_medida as UnidadeMedida;
     const fator = c.fator_rendimento || 1;
-    return (c.quantidade * custoUn) / fator;
+
+    // Convert: if insumo is in kg (custo per g) and recipe uses g, factor = 1
+    // getConversionFactor returns how many receitaUnits per insumoUnit
+    const convFactor = getConversionFactor(insumoUnit, receitaUnit);
+    if (convFactor === null) {
+      // Incompatible units — use direct calc as fallback
+      return (c.quantidade * custoUn) / fator;
+    }
+    // custoUn is price per insumo base unit. 
+    // If insumo is kg and custo_unitario = price/kg, recipe uses g:
+    // cost = qty_g * (price_per_kg / 1000) / fator
+    // convFactor (kg->g) = 1000, so: cost = qty * custoUn / convFactor / fator
+    return (c.quantidade * custoUn) / convFactor / fator;
   };
 
   const ingredientesComp = composicao.filter(c => c.insumo?.categoria === 'ingrediente');
