@@ -14,7 +14,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { formatarCusto } from '@/lib/smart-units';
-import { Plus, Trash2, BookOpen, Calculator, Package, CakeSlice } from 'lucide-react';
+import { Plus, Trash2, BookOpen, Calculator, Package, CakeSlice, Clock } from 'lucide-react';
+import { PrecificacaoCard } from '@/components/PrecificacaoCard';
 
 interface Insumo {
   id: string;
@@ -39,6 +40,7 @@ interface Receita {
   categoria_id: string | null;
   rendimento_quantidade: number | null;
   rendimento_unidade: string | null;
+  tempo_producao_minutos: number | null;
 }
 
 interface Categoria {
@@ -58,6 +60,7 @@ export default function Receitas() {
   const [formCategoriaId, setFormCategoriaId] = useState('');
   const [formRendQtd, setFormRendQtd] = useState('');
   const [formRendUn, setFormRendUn] = useState('');
+  const [formTempoMin, setFormTempoMin] = useState('');
 
   // Composição form
   const [addInsumoId, setAddInsumoId] = useState('');
@@ -113,13 +116,14 @@ export default function Receitas() {
         categoria_id: formCategoriaId || null,
         rendimento_quantidade: formRendQtd ? parseFloat(formRendQtd) : null,
         rendimento_unidade: formRendUn || null,
+        tempo_producao_minutos: formTempoMin ? parseFloat(formTempoMin) : null,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['receitas'] });
       setShowReceitaForm(false);
-      setFormNome(''); setFormDescricao(''); setFormCategoriaId(''); setFormRendQtd(''); setFormRendUn('');
+      setFormNome(''); setFormDescricao(''); setFormCategoriaId(''); setFormRendQtd(''); setFormRendUn(''); setFormTempoMin('');
       toast({ title: 'Receita criada!' });
     },
     onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
@@ -236,6 +240,10 @@ export default function Receitas() {
                       <Input value={formRendUn} onChange={e => setFormRendUn(e.target.value)} placeholder="fatias" />
                     </div>
                   </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> Tempo de Produção (min)</Label>
+                    <Input type="number" min="0" value={formTempoMin} onChange={e => setFormTempoMin(e.target.value)} placeholder="Ex: 120" />
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <Button type="submit" disabled={createReceitaMutation.isPending} className="flex-1">Criar</Button>
@@ -314,6 +322,14 @@ export default function Receitas() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Motor de Precificação */}
+            <PrecificacaoCard
+              custoInsumos={custoIngredientes}
+              custoEmbalagens={custoEmbalagens}
+              tempoProducao={receitaSelecionada.tempo_producao_minutos}
+              rendimentoQuantidade={receitaSelecionada.rendimento_quantidade}
+            />
 
             {/* Adicionar item */}
             <Card>

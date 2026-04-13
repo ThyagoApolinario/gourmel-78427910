@@ -1,4 +1,4 @@
-import { Package, BookOpen, LogOut, Tags } from 'lucide-react';
+import { Package, BookOpen, LogOut, Tags, Settings } from 'lucide-react';
 import logoGourmel from '@/assets/Logo_Gourmel.jpeg';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
@@ -21,6 +21,7 @@ const menuItems = [
   { title: 'Insumos', url: '/', icon: Package },
   { title: 'Receitas', url: '/receitas', icon: BookOpen },
   { title: 'Categorias', url: '/categorias', icon: Tags },
+  { title: 'Configurações', url: '/configuracoes', icon: Settings },
 ];
 
 export function AppSidebar() {
