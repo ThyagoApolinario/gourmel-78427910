@@ -240,6 +240,10 @@ export default function Receitas() {
                       <Input value={formRendUn} onChange={e => setFormRendUn(e.target.value)} placeholder="fatias" />
                     </div>
                   </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> Tempo de Produção (min)</Label>
+                    <Input type="number" min="0" value={formTempoMin} onChange={e => setFormTempoMin(e.target.value)} placeholder="Ex: 120" />
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <Button type="submit" disabled={createReceitaMutation.isPending} className="flex-1">Criar</Button>
