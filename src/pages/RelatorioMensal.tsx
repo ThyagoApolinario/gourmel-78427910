@@ -42,7 +42,8 @@ export default function RelatorioMensal() {
   const meses = useMemo(buildMonthOptions, []);
   const [mesSelecionado, setMesSelecionado] = useState(meses[0].value);
 
-  const inicioMes = startOfMonth(new Date(mesSelecionado + '-01'));
+  const [ano, mes] = mesSelecionado.split('-').map(Number);
+  const inicioMes = startOfMonth(new Date(ano, mes - 1, 1));
   const fimMes = endOfMonth(inicioMes);
 
   const { data: vendas = [] } = useQuery({
