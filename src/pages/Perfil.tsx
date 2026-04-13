@@ -9,10 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { User, Lock, Shield, CheckCircle2 } from 'lucide-react';
+import { User, Lock, Shield, CheckCircle2, Dog, Cake } from 'lucide-react';
+import { useProfile, type ProfileType } from '@/hooks/useProfile';
 
 export default function Perfil() {
   const { user, signOut } = useAuth();
+  const { profile, setProfile } = useProfile();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -95,7 +97,46 @@ export default function Perfil() {
           </CardContent>
         </Card>
 
-        {/* Segurança */}
+        {/* Perfil do Negócio */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Dog className="h-5 w-5 text-primary" />
+              Perfil do Negócio
+            </CardTitle>
+            <CardDescription>Escolha o tipo da sua confeitaria para personalizar a interface</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => { setProfile('canine'); toast.success('Perfil alterado para Confeitaria Canina! 🐾'); }}
+                className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                  profile === 'canine'
+                    ? 'border-primary bg-primary/5 shadow-sm'
+                    : 'border-border hover:border-primary/40'
+                }`}
+              >
+                <Dog className={`h-8 w-8 ${profile === 'canine' ? 'text-primary' : 'text-muted-foreground'}`} />
+                <span className="font-semibold text-sm">Canina Natural</span>
+                <span className="text-xs text-muted-foreground text-center">Petiscos e biscoitos pet</span>
+              </button>
+              <button
+                onClick={() => { setProfile('classic'); toast.success('Perfil alterado para Confeitaria Artesanal! 🎂'); }}
+                className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                  profile === 'classic'
+                    ? 'border-primary bg-primary/5 shadow-sm'
+                    : 'border-border hover:border-primary/40'
+                }`}
+              >
+                <Cake className={`h-8 w-8 ${profile === 'classic' ? 'text-primary' : 'text-muted-foreground'}`} />
+                <span className="font-semibold text-sm">Artesanal</span>
+                <span className="text-xs text-muted-foreground text-center">Bolos, doces e sobremesas</span>
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+
+
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
