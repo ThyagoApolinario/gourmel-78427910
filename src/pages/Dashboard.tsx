@@ -1,12 +1,14 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { AppLayout } from '@/components/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import { formatarCusto } from '@/lib/smart-units';
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -14,7 +16,7 @@ import {
 } from 'recharts';
 import {
   Star, Zap, Puzzle, Dog, BarChart3, AlertTriangle, Clock, TrendingUp,
-  ChevronDown, ChevronUp,
+  ChevronDown, ChevronUp, Target, Wallet,
 } from 'lucide-react';
 import { subDays, parseISO, isAfter } from 'date-fns';
 
