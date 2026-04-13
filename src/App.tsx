@@ -11,6 +11,7 @@ import Categorias from "./pages/Categorias";
 import Configuracoes from "./pages/Configuracoes";
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./pages/Perfil";
+import Ajuda from "./pages/Ajuda";
 import NotFound from "./pages/NotFound";
 import { useSessionGuard } from "./hooks/useSessionGuard";
 
@@ -38,6 +39,7 @@ function ProtectedRoutes() {
       <Route path="/configuracoes" element={<Configuracoes />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/perfil" element={<Perfil />} />
+      <Route path="/ajuda" element={<Ajuda />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

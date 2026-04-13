@@ -1,4 +1,4 @@
-import { Package, BookOpen, LogOut, Tags, Settings, BarChart3, UserCircle } from 'lucide-react';
+import { Package, BookOpen, LogOut, Tags, Settings, BarChart3, UserCircle, HelpCircle } from 'lucide-react';
 import logoGourmel from '@/assets/Logo_Gourmel.jpeg';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
@@ -24,6 +24,7 @@ const menuItems = [
   { title: 'Dashboard', url: '/dashboard', icon: BarChart3 },
   { title: 'Configurações', url: '/configuracoes', icon: Settings },
   { title: 'Meu Perfil', url: '/perfil', icon: UserCircle },
+  { title: 'Ajuda', url: '/ajuda', icon: HelpCircle },
 ];
 
 export function AppSidebar() {
