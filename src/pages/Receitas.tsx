@@ -441,40 +441,61 @@ export default function Receitas() {
                 <CardTitle className="text-base">Adicionar Insumo à Receita</CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={e => { e.preventDefault(); addComposicaoMutation.mutate(); }} className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
-                  <div className="space-y-1 sm:col-span-2">
-                    <Label className="text-xs">Insumo</Label>
-                    <Select value={addInsumoId} onValueChange={setAddInsumoId}>
-                      <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                      <SelectContent>
-                        {insumos.map(i => (
-                          <SelectItem key={i.id} value={i.id}>
-                            {i.categoria === 'embalagem' ? '📦' : '🧈'} {i.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Quantidade</Label>
-                    <Input type="number" step="0.01" min="0" value={addQtd} onChange={e => setAddQtd(e.target.value)} placeholder="0" required />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs flex items-center gap-1">Fator Rend. <HelpTooltip field="fator_rendimento" /></Label>
-                    <div className="flex gap-2">
-                      <Input type="number" step="0.01" min="0.01" max="2" value={addFator} onChange={e => setAddFator(e.target.value)} placeholder="1.0" />
-                      <Button type="submit" disabled={!addInsumoId || addComposicaoMutation.isPending} size="icon" className="shrink-0">
-                        <Plus className="h-4 w-4" />
-                      </Button>
+                <form onSubmit={e => { e.preventDefault(); addComposicaoMutation.mutate(); }} className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1 sm:col-span-2">
+                      <Label className="text-xs">Insumo</Label>
+                      <Select value={addInsumoId} onValueChange={setAddInsumoId}>
+                        <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                        <SelectContent>
+                          {insumos.map(i => (
+                            <SelectItem key={i.id} value={i.id}>
+                              {i.categoria === 'embalagem' ? '📦' : '🧈'} {i.nome} <span className="text-muted-foreground">({i.unidade_medida})</span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Quantidade + Unidade</Label>
+                      <div className="flex gap-2">
+                        <Input type="number" step="0.01" min="0" value={addQtd} onChange={e => setAddQtd(e.target.value)} placeholder="0" required className="flex-1" />
+                        <Select value={addUnidade} onValueChange={v => setAddUnidade(v as UnidadeMedida)}>
+                          <SelectTrigger className="w-24">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="g">g</SelectItem>
+                            <SelectItem value="kg">kg</SelectItem>
+                            <SelectItem value="ml">ml</SelectItem>
+                            <SelectItem value="l">L</SelectItem>
+                            <SelectItem value="un">un</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs flex items-center gap-1">Fator Rend. <HelpTooltip field="fator_rendimento" /></Label>
+                      <div className="flex gap-2">
+                        <Input type="number" step="0.01" min="0.01" max="2" value={addFator} onChange={e => setAddFator(e.target.value)} placeholder="1.0" />
+                        <Button type="submit" disabled={!addInsumoId || !!unitWarning || addComposicaoMutation.isPending} size="icon" className="shrink-0">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
+                  {unitWarning && (
+                    <Alert variant="destructive" className="py-2">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription className="text-xs">{unitWarning}</AlertDescription>
+                    </Alert>
+                  )}
+                  {parseFloat(addFator) < 1 && parseFloat(addFator) > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      ⚠️ Fator {addFator} = {((1 - parseFloat(addFator)) * 100).toFixed(0)}% de perda — o custo será ajustado para cima
+                    </p>
+                  )}
                 </form>
-                {parseFloat(addFator) < 1 && parseFloat(addFator) > 0 && (
-                  <p className="text-xs text-muted-foreground mt-2">
-                    ⚠️ Fator {addFator} = {((1 - parseFloat(addFator)) * 100).toFixed(0)}% de perda — o custo será ajustado para cima
-                  </p>
-                )}
-              </CardContent>
             </Card>
 
             {/* Tabela de composição */}
