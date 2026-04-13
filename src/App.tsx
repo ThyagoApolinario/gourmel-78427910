@@ -10,6 +10,7 @@ import Insumos from "./pages/Insumos";
 import Receitas from "./pages/Receitas";
 import Vendas from "./pages/Vendas";
 import RelatorioMensal from "./pages/RelatorioMensal";
+import CustosFixos from "./pages/CustosFixos";
 import Categorias from "./pages/Categorias";
 import Configuracoes from "./pages/Configuracoes";
 import Dashboard from "./pages/Dashboard";
