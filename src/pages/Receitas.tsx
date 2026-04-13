@@ -15,7 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { formatarCusto } from '@/lib/smart-units';
-import { Plus, Trash2, BookOpen, Calculator, Package, CakeSlice, Clock, Scale, Cookie, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, BookOpen, Calculator, Package, CakeSlice, Clock, Scale, Cookie, AlertTriangle, Check, Pencil, X } from 'lucide-react';
 import { PrecificacaoCard } from '@/components/PrecificacaoCard';
 import { HelpTooltip } from '@/components/HelpTooltip';
 
@@ -99,6 +99,12 @@ export default function Receitas() {
   const [addFator, setAddFator] = useState('1');
   const [addUnidade, setAddUnidade] = useState<UnidadeMedida>('g');
   const [unitWarning, setUnitWarning] = useState<string | null>(null);
+
+  // Inline editing state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editQtd, setEditQtd] = useState('');
+  const [editUnidade, setEditUnidade] = useState<UnidadeMedida>('g');
+  const [editFator, setEditFator] = useState('1');
 
   const { data: receitas = [] } = useQuery({
     queryKey: ['receitas'],
@@ -218,6 +224,21 @@ export default function Receitas() {
       queryClient.invalidateQueries({ queryKey: ['composicao'] });
       toast({ title: 'Item removido!' });
     },
+  });
+
+  const updateComposicaoMutation = useMutation({
+    mutationFn: async ({ id, quantidade, unidade_medida, fator_rendimento }: { id: string; quantidade: number; unidade_medida: UnidadeMedida; fator_rendimento: number }) => {
+      if (quantidade <= 0) throw new Error('A quantidade deve ser maior que zero.');
+      if (fator_rendimento <= 0) throw new Error('O fator de rendimento deve ser maior que zero.');
+      const { error } = await supabase.from('composicao_receita').update({ quantidade, unidade_medida, fator_rendimento }).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['composicao'] });
+      setEditingId(null);
+      toast({ title: 'Item atualizado!' });
+    },
+    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
   });
 
   const deleteReceitaMutation = useMutation({
@@ -519,7 +540,25 @@ export default function Receitas() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {composicao.map(c => (
+                        {composicao.map(c => {
+                          const isEditing = editingId === c.id;
+                          const startEdit = () => {
+                            setEditingId(c.id);
+                            setEditQtd(String(c.quantidade));
+                            setEditUnidade(c.unidade_medida);
+                            setEditFator(String(c.fator_rendimento));
+                          };
+                          const cancelEdit = () => setEditingId(null);
+                          const saveEdit = () => {
+                            updateComposicaoMutation.mutate({
+                              id: c.id,
+                              quantidade: parseFloat(editQtd),
+                              unidade_medida: editUnidade,
+                              fator_rendimento: parseFloat(editFator) || 1,
+                            });
+                          };
+
+                          return (
                           <TableRow key={c.id}>
                             <TableCell>
                               <div className="flex items-center gap-1.5">
@@ -527,9 +566,29 @@ export default function Receitas() {
                                 <span className="font-medium text-sm">{c.insumo?.nome}</span>
                               </div>
                             </TableCell>
-                            <TableCell className="text-sm">{c.quantidade} {c.unidade_medida}</TableCell>
                             <TableCell>
-                              {c.fator_rendimento !== 1 ? (
+                              {isEditing ? (
+                                <div className="flex gap-1 items-center">
+                                  <Input type="number" step="0.01" min="0.01" value={editQtd} onChange={e => setEditQtd(e.target.value)} className="h-7 w-20 text-sm" />
+                                  <Select value={editUnidade} onValueChange={v => setEditUnidade(v as UnidadeMedida)}>
+                                    <SelectTrigger className="h-7 w-16 text-xs"><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="g">g</SelectItem>
+                                      <SelectItem value="kg">kg</SelectItem>
+                                      <SelectItem value="ml">ml</SelectItem>
+                                      <SelectItem value="l">L</SelectItem>
+                                      <SelectItem value="un">un</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              ) : (
+                                <span className="text-sm">{c.quantidade} {c.unidade_medida}</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {isEditing ? (
+                                <Input type="number" step="0.01" min="0.01" max="2" value={editFator} onChange={e => setEditFator(e.target.value)} className="h-7 w-16 text-sm" />
+                              ) : c.fator_rendimento !== 1 ? (
                                 <Badge variant="outline" className="text-xs">{c.fator_rendimento}</Badge>
                               ) : (
                                 <span className="text-xs text-muted-foreground">1.0</span>
@@ -537,12 +596,31 @@ export default function Receitas() {
                             </TableCell>
                             <TableCell className="font-mono text-sm">{formatarCusto(calcItemCost(c))}</TableCell>
                             <TableCell>
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeComposicaoMutation.mutate(c.id)}>
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
+                              <div className="flex gap-0.5">
+                                {isEditing ? (
+                                  <>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-primary" onClick={saveEdit} disabled={!editQtd || parseFloat(editQtd) <= 0 || updateComposicaoMutation.isPending}>
+                                      <Check className="h-3 w-3" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={cancelEdit}>
+                                      <X className="h-3 w-3" />
+                                    </Button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={startEdit}>
+                                      <Pencil className="h-3 w-3" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeComposicaoMutation.mutate(c.id)}>
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
                             </TableCell>
                           </TableRow>
-                        ))}
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   </div>
