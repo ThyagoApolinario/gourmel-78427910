@@ -1,12 +1,14 @@
-import { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useMemo, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { TrendingUp, AlertTriangle, Target, DollarSign } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Target, DollarSign, Save } from 'lucide-react';
 import { formatarCusto } from '@/lib/smart-units';
+import { useToast } from '@/hooks/use-toast';
 
 interface ConfigFinanceira {
   taxa_cartao: number;
@@ -21,6 +23,8 @@ interface PrecificacaoCardProps {
   custoEmbalagens: number;
   tempoProducao: number | null;
   rendimentoQuantidade: number | null;
+  receitaId: string;
+  margemSalva: number | null;
 }
 
 export function PrecificacaoCard({
@@ -28,7 +32,12 @@ export function PrecificacaoCard({
   custoEmbalagens,
   tempoProducao,
   rendimentoQuantidade,
+  receitaId,
+  margemSalva,
 }: PrecificacaoCardProps) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const { data: config } = useQuery({
     queryKey: ['configuracoes_financeiras'],
     queryFn: async () => {
@@ -41,11 +50,28 @@ export function PrecificacaoCard({
     },
   });
 
-  const defaultMargem = config?.margem_desejada ?? 30;
+  // Per-recipe margin takes priority > saved per-recipe > global config > default 30
+  const defaultMargem = margemSalva ?? config?.margem_desejada ?? 30;
   const [margemSlider, setMargemSlider] = useState<number | null>(null);
   const margem = margemSlider ?? defaultMargem;
+  const hasUnsavedMargem = margemSlider !== null && margemSlider !== (margemSalva ?? config?.margem_desejada ?? 30);
 
-  // Recalculate when config loads
+  const saveMargemMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from('receitas')
+        .update({ margem_desejada: margem })
+        .eq('id', receitaId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['receitas'] });
+      setMargemSlider(null);
+      toast({ title: 'Margem salva para esta receita!' });
+    },
+    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+  });
+
   const taxaCartao = config?.taxa_cartao ?? 5;
   const impostos = config?.impostos ?? 5;
   const custoMinuto = config ? config.pro_labore / (config.horas_mes * 60) : 0;
@@ -54,7 +80,6 @@ export function PrecificacaoCard({
   const custoVariavelTotal = custoInsumos + custoEmbalagens + custoMaoDeObra;
 
   const totalPercentuais = (taxaCartao + impostos + margem) / 100;
-
   const isMargemCritica = totalPercentuais >= 1;
 
   const precoSugerido = useMemo(() => {
@@ -89,15 +114,15 @@ export function PrecificacaoCard({
 
   return (
     <Card className="border-primary/20">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
+      <CardHeader className="pb-3 px-3 sm:px-6">
+        <CardTitle className="text-base sm:text-lg flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-primary" />
           Motor de Precificação
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-3 sm:px-6">
         {/* Cost breakdown */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <div className="text-center p-2 rounded-lg bg-muted/50">
             <p className="text-[10px] text-muted-foreground">Insumos</p>
             <p className="font-semibold text-sm">{formatarCusto(custoInsumos)}</p>
@@ -124,8 +149,13 @@ export function PrecificacaoCard({
         {/* Margin slider */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium">Margem de Contribuição</Label>
-            <Badge variant="outline" className="font-mono">{margem.toFixed(0)}%</Badge>
+            <label className="text-sm font-medium">Margem de Contribuição</label>
+            <div className="flex items-center gap-2">
+              {margemSalva !== null && (
+                <Badge variant="secondary" className="text-[10px]">Personalizada</Badge>
+              )}
+              <Badge variant="outline" className="font-mono">{margem.toFixed(0)}%</Badge>
+            </div>
           </div>
           <Slider
             value={[margem]}
@@ -133,13 +163,26 @@ export function PrecificacaoCard({
             min={10}
             max={80}
             step={1}
-            className="w-full"
+            className="w-full touch-none"
           />
           <div className="flex justify-between text-[10px] text-muted-foreground">
             <span>10%</span>
-            <span className="text-xs">Taxas: {taxaCartao}% + Imp: {impostos}% + Margem: {margem.toFixed(0)}% = {(totalPercentuais * 100).toFixed(0)}%</span>
+            <span className="hidden sm:inline text-xs">Taxas: {taxaCartao}% + Imp: {impostos}% + Margem: {margem.toFixed(0)}% = {(totalPercentuais * 100).toFixed(0)}%</span>
+            <span className="sm:hidden text-xs">Total: {(totalPercentuais * 100).toFixed(0)}%</span>
             <span>80%</span>
           </div>
+          {hasUnsavedMargem && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full mt-1"
+              onClick={() => saveMargemMutation.mutate()}
+              disabled={saveMargemMutation.isPending}
+            >
+              <Save className="h-3.5 w-3.5 mr-1" />
+              Salvar margem de {margem.toFixed(0)}% para esta receita
+            </Button>
+          )}
         </div>
 
         {/* Critical alert */}
@@ -156,31 +199,31 @@ export function PrecificacaoCard({
         {/* Price result */}
         {!isMargemCritica && precoSugerido !== null && (
           <Card className="border-success/30 bg-success/5">
-            <CardContent className="p-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <CardContent className="p-3 sm:p-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div className="text-center">
-                  <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground flex items-center justify-center gap-1">
                     <DollarSign className="h-3 w-3" /> Preço Total
                   </p>
-                  <p className="font-bold text-xl text-success">{formatarCusto(precoSugerido)}</p>
+                  <p className="font-bold text-lg sm:text-xl text-success">{formatarCusto(precoSugerido)}</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs text-muted-foreground">Preço/Unidade</p>
-                  <p className="font-bold text-lg">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Preço/Unidade</p>
+                  <p className="font-bold text-base sm:text-lg">
                     {precoSugeridoPorUnidade ? formatarCusto(precoSugeridoPorUnidade) : '—'}
                   </p>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground flex items-center justify-center gap-1">
                     <Target className="h-3 w-3" /> Ponto Equilíbrio
                   </p>
-                  <p className="font-bold text-lg">
+                  <p className="font-bold text-base sm:text-lg">
                     {pontoEquilibrio ? `${pontoEquilibrio.toFixed(1)} un` : '—'}
                   </p>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs text-muted-foreground">Lucro/Unidade</p>
-                  <p className={`font-bold text-lg ${lucroLiquidoPorUnidade && lucroLiquidoPorUnidade > 0 ? 'text-success' : 'text-destructive'}`}>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Lucro/Unidade</p>
+                  <p className={`font-bold text-base sm:text-lg ${lucroLiquidoPorUnidade && lucroLiquidoPorUnidade > 0 ? 'text-success' : 'text-destructive'}`}>
                     {lucroLiquidoPorUnidade ? formatarCusto(lucroLiquidoPorUnidade) : '—'}
                   </p>
                 </div>
@@ -196,8 +239,4 @@ export function PrecificacaoCard({
       </CardContent>
     </Card>
   );
-}
-
-function Label({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <label className={className}>{children}</label>;
 }

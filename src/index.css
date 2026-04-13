@@ -104,5 +104,18 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Ensure touch targets are at least 44px */
+  @media (pointer: coarse) {
+    button, [role="button"], a {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0);
   }
 }
