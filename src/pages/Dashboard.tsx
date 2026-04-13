@@ -123,6 +123,7 @@ const PERIODOS = [
 ];
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const [periodo, setPeriodo] = useState('90');
   const [expandedQuadrante, setExpandedQuadrante] = useState<Quadrante | null>(null);
 
