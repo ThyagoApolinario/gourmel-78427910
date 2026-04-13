@@ -496,6 +496,7 @@ export default function Receitas() {
                     </p>
                   )}
                 </form>
+              </CardContent>
             </Card>
 
             {/* Tabela de composição */}
