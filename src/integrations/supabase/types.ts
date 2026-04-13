@@ -125,6 +125,42 @@ export type Database = {
         }
         Relationships: []
       }
+      custos_fixos: {
+        Row: {
+          categoria: Database["public"]["Enums"]["categoria_custo_fixo"]
+          created_at: string
+          descricao: string | null
+          id: string
+          nome: string
+          percentual_rateio: number
+          updated_at: string
+          user_id: string
+          valor_mensal: number
+        }
+        Insert: {
+          categoria?: Database["public"]["Enums"]["categoria_custo_fixo"]
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          percentual_rateio?: number
+          updated_at?: string
+          user_id: string
+          valor_mensal?: number
+        }
+        Update: {
+          categoria?: Database["public"]["Enums"]["categoria_custo_fixo"]
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          percentual_rateio?: number
+          updated_at?: string
+          user_id?: string
+          valor_mensal?: number
+        }
+        Relationships: []
+      }
       insumos: {
         Row: {
           categoria: Database["public"]["Enums"]["categoria_insumo"]
@@ -300,6 +336,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      categoria_custo_fixo:
+        | "aluguel_cozinha"
+        | "energia_agua"
+        | "internet"
+        | "marketing"
+        | "pro_labore"
+        | "ferramentas_software"
+        | "outros"
       categoria_insumo: "ingrediente" | "embalagem"
       unidade_medida: "g" | "kg" | "ml" | "l" | "un"
     }
@@ -430,6 +474,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      categoria_custo_fixo: [
+        "aluguel_cozinha",
+        "energia_agua",
+        "internet",
+        "marketing",
+        "pro_labore",
+        "ferramentas_software",
+        "outros",
+      ],
       categoria_insumo: ["ingrediente", "embalagem"],
       unidade_medida: ["g", "kg", "ml", "l", "un"],
     },
