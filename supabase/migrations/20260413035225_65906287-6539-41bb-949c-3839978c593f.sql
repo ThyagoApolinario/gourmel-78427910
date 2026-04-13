@@ -1,0 +1,1 @@
+ALTER TABLE public.receitas ADD COLUMN margem_desejada NUMERIC DEFAULT NULL;
