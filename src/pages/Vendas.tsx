@@ -215,20 +215,42 @@ export default function Vendas() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Quantidade</Label>
-                <div className="flex items-center gap-2">
-                  <Button type="button" variant="outline" size="icon" className="h-10 w-10 shrink-0"
-                    onClick={() => setQuantidade(Math.max(1, quantidade - 1))}>
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  <Input type="number" min={1} value={quantidade}
-                    onChange={(e) => setQuantidade(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="text-center" />
-                  <Button type="button" variant="outline" size="icon" className="h-10 w-10 shrink-0"
-                    onClick={() => setQuantidade(quantidade + 1)}>
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Label className="flex items-center gap-1">
+                  Quantidade {isVendaPorPeso && <Scale className="h-3.5 w-3.5 text-muted-foreground" />}
+                </Label>
+                {isVendaPorPeso ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      value={quantidade}
+                      onChange={(e) => setQuantidade(Math.max(0.01, parseFloat(e.target.value) || 0.01))}
+                      className="text-center"
+                      placeholder="Ex: 0.5"
+                    />
+                    <span className="text-xs text-muted-foreground shrink-0">g</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Button type="button" variant="outline" size="icon" className="h-10 w-10 shrink-0"
+                      onClick={() => setQuantidade(Math.max(1, quantidade - 1))}>
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <Input type="number" min={1} value={quantidade}
+                      onChange={(e) => setQuantidade(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="text-center" />
+                    <Button type="button" variant="outline" size="icon" className="h-10 w-10 shrink-0"
+                      onClick={() => setQuantidade(quantidade + 1)}>
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+                {isVendaPorPeso && (
+                  <p className="text-[10px] text-muted-foreground">
+                    ⚖️ Produto vendido por peso — informe a quantidade em gramas
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label>Valor unitário (R$)</Label>
