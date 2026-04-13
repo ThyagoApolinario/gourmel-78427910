@@ -1,4 +1,4 @@
-import { Package, BookOpen, LogOut, Tags, Settings, BarChart3, UserCircle, HelpCircle, Dog, ShoppingBag } from 'lucide-react';
+import { Package, BookOpen, LogOut, Tags, Settings, BarChart3, UserCircle, HelpCircle, Dog, ShoppingBag, CalendarRange } from 'lucide-react';
 import logoGourmel from '@/assets/Logo_Gourmel.jpeg';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
@@ -31,6 +31,7 @@ export function AppSidebar() {
     { title: labels.vendas, url: '/vendas', icon: ShoppingBag },
     { title: labels.categorias, url: '/categorias', icon: Tags },
     { title: labels.dashboard, url: '/dashboard', icon: BarChart3 },
+    { title: labels.relatorio, url: '/relatorio', icon: CalendarRange },
     { title: labels.configuracoes, url: '/configuracoes', icon: Settings },
     { title: labels.perfil, url: '/perfil', icon: UserCircle },
     { title: labels.ajuda, url: '/ajuda', icon: HelpCircle },
