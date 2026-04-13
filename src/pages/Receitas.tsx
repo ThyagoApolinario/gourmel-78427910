@@ -193,15 +193,15 @@ export default function Receitas() {
 
   return (
     <AppLayout>
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Receitas</h1>
-            <p className="text-muted-foreground text-sm">Fichas técnicas com controle de custos</p>
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold">Receitas</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm">Fichas técnicas com controle de custos</p>
           </div>
           {!showReceitaForm && (
-            <Button onClick={() => setShowReceitaForm(true)}>
-              <Plus className="h-4 w-4 mr-1" /> Nova Receita
+            <Button onClick={() => setShowReceitaForm(true)} className="shrink-0 h-10 sm:h-10">
+              <Plus className="h-4 w-4 mr-1" /> <span className="hidden sm:inline">Nova Receita</span><span className="sm:hidden">Nova</span>
             </Button>
           )}
         </div>
@@ -265,20 +265,25 @@ export default function Receitas() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3">
               {receitas.map(r => (
-                <Card key={r.id} className="cursor-pointer hover:border-primary/30 transition-colors" onClick={() => setSelectedReceita(r.id)}>
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">{r.nome}</p>
-                      {r.descricao && <p className="text-sm text-muted-foreground">{r.descricao}</p>}
-                      {r.rendimento_quantidade && (
-                        <p className="text-xs text-muted-foreground mt-1">Rende: {r.rendimento_quantidade} {r.rendimento_unidade}</p>
-                      )}
+                <Card key={r.id} className="cursor-pointer hover:border-primary/30 active:bg-muted/30 transition-colors" onClick={() => setSelectedReceita(r.id)}>
+                  <CardContent className="p-3 sm:p-4 flex items-center justify-between">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium truncate">{r.nome}</p>
+                      {r.descricao && <p className="text-sm text-muted-foreground truncate">{r.descricao}</p>}
+                      <div className="flex items-center gap-2 mt-1">
+                        {r.rendimento_quantidade && (
+                          <span className="text-xs text-muted-foreground">Rende: {r.rendimento_quantidade} {r.rendimento_unidade}</span>
+                        )}
+                        {r.margem_desejada && (
+                          <Badge variant="secondary" className="text-[10px]">Margem: {r.margem_desejada}%</Badge>
+                        )}
+                      </div>
                     </div>
                     {isAdmin && (
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive shrink-0" onClick={e => { e.stopPropagation(); deleteReceitaMutation.mutate(r.id); }}>
-                        <Trash2 className="h-3.5 w-3.5" />
+                      <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive shrink-0 ml-2" onClick={e => { e.stopPropagation(); deleteReceitaMutation.mutate(r.id); }}>
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     )}
                   </CardContent>
@@ -298,12 +303,12 @@ export default function Receitas() {
 
             {/* Card de Resumo de Custo */}
             <Card className="border-primary/20 bg-primary/5">
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Calculator className="h-5 w-5 text-primary" />
                   <h3 className="font-semibold">Resumo de Custos</h3>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   <div className="text-center p-2 rounded-lg bg-card">
                     <p className="text-xs text-muted-foreground flex items-center justify-center gap-1"><CakeSlice className="h-3 w-3" /> Ingredientes</p>
                     <p className="font-bold text-lg">{formatarCusto(custoIngredientes)}</p>
