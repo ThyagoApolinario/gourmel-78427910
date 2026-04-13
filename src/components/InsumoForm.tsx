@@ -149,6 +149,7 @@ export function InsumoForm({ onSubmit, initialData, loading, onCancel }: InsumoF
                 Peso/Volume da Embalagem <HelpTooltip field="peso_embalagem" />
               </Label>
               <Input id="peso" type="number" step="0.01" min="0" value={form.peso_volume_embalagem} onChange={e => update('peso_volume_embalagem', e.target.value)} placeholder="Ex: 1000" required />
+            </div>
           </div>
 
           {preco > 0 && peso > 0 && (
