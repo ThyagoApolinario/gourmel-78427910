@@ -523,7 +523,7 @@ export default function Receitas() {
                                 <span className="font-medium text-sm">{c.insumo?.nome}</span>
                               </div>
                             </TableCell>
-                            <TableCell className="text-sm">{c.quantidade} {c.insumo?.unidade_medida}</TableCell>
+                            <TableCell className="text-sm">{c.quantidade} {c.unidade_medida}</TableCell>
                             <TableCell>
                               {c.fator_rendimento !== 1 ? (
                                 <Badge variant="outline" className="text-xs">{c.fator_rendimento}</Badge>
