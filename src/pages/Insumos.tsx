@@ -105,14 +105,14 @@ export default function Insumos() {
 
   return (
     <AppLayout>
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Insumos</h1>
-            <p className="text-muted-foreground text-sm">Gerencie matérias-primas e embalagens</p>
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold">Insumos</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm">Gerencie matérias-primas e embalagens</p>
           </div>
           {!showForm && !editing && (
-            <Button onClick={() => setShowForm(true)}>
+            <Button onClick={() => setShowForm(true)} className="shrink-0 h-10">
               <Plus className="h-4 w-4 mr-1" /> Novo
             </Button>
           )}
@@ -214,11 +214,11 @@ function InsumoTable({ title, items, onEdit, onDelete }: {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(item)}>
-                        <Pencil className="h-3.5 w-3.5" />
+                      <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => onEdit(item)}>
+                        <Pencil className="h-4 w-4" />
                       </Button>
                       {onDelete && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => onDelete(item.id)}>
+                        <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive" onClick={() => onDelete(item.id)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       )}

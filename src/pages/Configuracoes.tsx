@@ -101,10 +101,10 @@ export default function Configuracoes() {
 
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Configurações Financeiras</h1>
-          <p className="text-muted-foreground text-sm">Defina as variáveis do seu negócio para precificação</p>
+          <h1 className="text-xl sm:text-2xl font-bold">Configurações Financeiras</h1>
+          <p className="text-muted-foreground text-xs sm:text-sm">Defina as variáveis do seu negócio para precificação</p>
         </div>
 
         <form onSubmit={e => { e.preventDefault(); saveMutation.mutate(); }} className="space-y-6">
