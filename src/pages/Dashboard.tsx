@@ -452,7 +452,7 @@ export default function Dashboard() {
               </Alert>
             )}
 
-            {/* Breakeven Progress */}
+            {/* Breakeven Progress with Milestone Alerts */}
             {(() => {
               const custoFixoTotal = custosFixos.reduce((s, c) => s + (c.valor_mensal * c.percentual_rateio / 100), 0);
               if (custoFixoTotal <= 0 || mediaMargem <= 0) return null;
@@ -463,34 +463,26 @@ export default function Dashboard() {
               const breakevenReais = custoFixoTotal / margemPctMedia;
               const faturamentoTotal = vendasFiltradas.reduce((s, v) => s + v.preco_venda * v.quantidade, 0);
               const progressoPct = Math.min((faturamentoTotal / breakevenReais) * 100, 100);
+
+              const milestones = [
+                { pct: 50, label: 'Meio caminho!', emoji: '🚀', msg: 'Você já cobriu metade dos custos fixos. Continue assim!' },
+                { pct: 75, label: 'Quase lá!', emoji: '🔥', msg: 'Falta apenas 25% para cobrir todos os custos fixos!' },
+                { pct: 100, label: 'Meta atingida!', emoji: '🎉', msg: 'Custos fixos cobertos! A partir daqui é lucro real!' },
+              ];
+
+              const reachedMilestones = milestones.filter(m => progressoPct >= m.pct);
+              const nextMilestone = milestones.find(m => progressoPct < m.pct);
+
               return (
-                <Card className="border-accent/20">
-                  <CardContent className="p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Target className="h-4 w-4 text-accent" />
-                        <span className="text-sm font-semibold">Cobertura de Custos Fixos</span>
-                      </div>
-                      <a href="/custos-fixos" className="text-xs text-primary hover:underline flex items-center gap-1">
-                        <Wallet className="h-3 w-3" /> Gerenciar
-                      </a>
-                    </div>
-                    <Progress value={progressoPct} className="h-3" />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>
-                        R$ {faturamentoTotal.toFixed(2).replace('.', ',')} vendidos
-                      </span>
-                      <span>
-                        Meta: R$ {breakevenReais.toFixed(2).replace('.', ',')}
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground">
-                      {progressoPct >= 100
-                        ? '🎉 Custos fixos cobertos! A partir daqui é lucro real no bolso.'
-                        : `Falta ${(100 - progressoPct).toFixed(0)}% para cobrir R$ ${custoFixoTotal.toFixed(2).replace('.', ',')} de custos fixos mensais`}
-                    </p>
-                  </CardContent>
-                </Card>
+                <BreakevenCard
+                  custoFixoTotal={custoFixoTotal}
+                  breakevenReais={breakevenReais}
+                  faturamentoTotal={faturamentoTotal}
+                  progressoPct={progressoPct}
+                  milestones={milestones}
+                  reachedMilestones={reachedMilestones}
+                  nextMilestone={nextMilestone}
+                />
               );
             })()}
 
