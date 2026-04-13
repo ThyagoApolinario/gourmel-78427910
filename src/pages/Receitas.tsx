@@ -187,12 +187,16 @@ export default function Receitas() {
 
   const addComposicaoMutation = useMutation({
     mutationFn: async () => {
+      const qty = parseFloat(addQtd);
+      const fator = parseFloat(addFator) || 1;
+      if (!qty || qty <= 0) throw new Error('A quantidade deve ser maior que zero.');
+      if (fator <= 0) throw new Error('O fator de rendimento deve ser maior que zero.');
       const { error } = await supabase.from('composicao_receita').insert({
         user_id: user!.id,
         receita_id: selectedReceita!,
         insumo_id: addInsumoId,
-        quantidade: parseFloat(addQtd),
-        fator_rendimento: parseFloat(addFator) || 1,
+        quantidade: qty,
+        fator_rendimento: fator,
         unidade_medida: addUnidade,
       });
       if (error) throw error;
@@ -459,7 +463,7 @@ export default function Receitas() {
                     <div className="space-y-1">
                       <Label className="text-xs">Quantidade + Unidade</Label>
                       <div className="flex gap-2">
-                        <Input type="number" step="0.01" min="0" value={addQtd} onChange={e => setAddQtd(e.target.value)} placeholder="0" required className="flex-1" />
+                        <Input type="number" step="0.01" min="0.01" value={addQtd} onChange={e => setAddQtd(e.target.value)} placeholder="Ex: 250" required className="flex-1" />
                         <Select value={addUnidade} onValueChange={v => setAddUnidade(v as UnidadeMedida)}>
                           <SelectTrigger className="w-24">
                             <SelectValue />
@@ -478,7 +482,7 @@ export default function Receitas() {
                       <Label className="text-xs flex items-center gap-1">Fator Rend. <HelpTooltip field="fator_rendimento" /></Label>
                       <div className="flex gap-2">
                         <Input type="number" step="0.01" min="0.01" max="2" value={addFator} onChange={e => setAddFator(e.target.value)} placeholder="1.0" />
-                        <Button type="submit" disabled={!addInsumoId || !!unitWarning || addComposicaoMutation.isPending} size="icon" className="shrink-0">
+                        <Button type="submit" disabled={!addInsumoId || !!unitWarning || !addQtd || parseFloat(addQtd) <= 0 || addComposicaoMutation.isPending} size="icon" className="shrink-0">
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
