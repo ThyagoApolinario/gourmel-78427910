@@ -35,7 +35,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>
             <div className="flex items-center gap-2">
               <CakeSlice className="h-4 w-4 text-primary" />
-              {!collapsed && <span className="font-semibold">Doce Gestão</span>}
+              {!collapsed && <span className="font-semibold">Gourmel Doce Gestão</span>}
             </div>
           </SidebarGroupLabel>
           <SidebarGroupContent>
