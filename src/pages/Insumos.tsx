@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/hooks/use-toast';
 import { formatarCusto } from '@/lib/smart-units';
 import { Plus, Pencil, Trash2, Package } from 'lucide-react';
+import { OnboardingChecklist } from '@/components/OnboardingChecklist';
 
 interface Insumo {
   id: string;
@@ -106,6 +107,7 @@ export default function Insumos() {
   return (
     <AppLayout>
       <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+        <OnboardingChecklist />
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
             <h1 className="text-xl sm:text-2xl font-bold">Insumos</h1>
