@@ -41,6 +41,7 @@ interface Receita {
   rendimento_quantidade: number | null;
   rendimento_unidade: string | null;
   tempo_producao_minutos: number | null;
+  margem_desejada: number | null;
 }
 
 interface Categoria {
@@ -329,6 +330,8 @@ export default function Receitas() {
               custoEmbalagens={custoEmbalagens}
               tempoProducao={receitaSelecionada.tempo_producao_minutos}
               rendimentoQuantidade={receitaSelecionada.rendimento_quantidade}
+              receitaId={receitaSelecionada.id}
+              margemSalva={receitaSelecionada.margem_desejada}
             />
 
             {/* Adicionar item */}
