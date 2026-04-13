@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { AppLayout } from '@/components/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +24,7 @@ interface ConfigFinanceira {
 
 export default function Configuracoes() {
   const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -33,11 +35,13 @@ export default function Configuracoes() {
   const [horasMes, setHorasMes] = useState('160');
 
   const { data: config, isLoading } = useQuery({
-    queryKey: ['configuracoes_financeiras'],
+    queryKey: ['configuracoes_financeiras', isAdmin],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('configuracoes_financeiras')
         .select('*')
+        .order('created_at', { ascending: true })
+        .limit(1)
         .maybeSingle();
       if (error) throw error;
       return data as ConfigFinanceira | null;
