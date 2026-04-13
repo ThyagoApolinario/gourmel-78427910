@@ -238,6 +238,47 @@ export type Database = {
         }
         Relationships: []
       }
+      vendas: {
+        Row: {
+          created_at: string
+          data_venda: string
+          id: string
+          preco_venda: number
+          quantidade: number
+          receita_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_venda?: string
+          id?: string
+          preco_venda: number
+          quantidade?: number
+          receita_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data_venda?: string
+          id?: string
+          preco_venda?: number
+          quantidade?: number
+          receita_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendas_receita_id_fkey"
+            columns: ["receita_id"]
+            isOneToOne: false
+            referencedRelation: "receitas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
