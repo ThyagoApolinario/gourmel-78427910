@@ -49,6 +49,7 @@ export type Database = {
           insumo_id: string
           quantidade: number
           receita_id: string
+          unidade_medida: Database["public"]["Enums"]["unidade_medida"]
           updated_at: string
           user_id: string
         }
@@ -59,6 +60,7 @@ export type Database = {
           insumo_id: string
           quantidade: number
           receita_id: string
+          unidade_medida?: Database["public"]["Enums"]["unidade_medida"]
           updated_at?: string
           user_id: string
         }
@@ -69,6 +71,7 @@ export type Database = {
           insumo_id?: string
           quantidade?: number
           receita_id?: string
+          unidade_medida?: Database["public"]["Enums"]["unidade_medida"]
           updated_at?: string
           user_id?: string
         }
