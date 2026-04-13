@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { PawPrint, Plus, Minus, Trash2, ShoppingBag, CalendarIcon, Filter, TrendingUp } from 'lucide-react';
+import { PawPrint, Plus, Minus, Trash2, ShoppingBag, CalendarIcon, Filter, TrendingUp, Download } from 'lucide-react';
 import { format, subDays, subMonths, startOfDay, endOfDay, eachDayOfInterval, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -377,10 +377,31 @@ export default function Vendas() {
 
         {/* Sales Feed */}
         <div>
-          <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            Histórico de vendas
-            <Badge variant="secondary" className="text-xs">{vendasFiltradas.length}</Badge>
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              Histórico de vendas
+              <Badge variant="secondary" className="text-xs">{vendasFiltradas.length}</Badge>
+            </h2>
+            {vendasFiltradas.length > 0 && (
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
+                const header = 'Produto;Quantidade;Valor Unitário;Total;Canal;Data\n';
+                const rows = vendasFiltradas.map((v: any) =>
+                  `${v.receitas?.nome || 'Removido'};${v.quantidade};${Number(v.preco_venda).toFixed(2).replace('.', ',')};${(v.preco_venda * v.quantidade).toFixed(2).replace('.', ',')};${v.canal_venda || 'Direto'};${format(new Date(v.data_venda + 'T12:00:00'), 'dd/MM/yyyy')}`
+                ).join('\n');
+                const blob = new Blob(['\uFEFF' + header + rows], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `vendas_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+                toast({ title: 'CSV exportado! 📄' });
+              }}>
+                <Download className="h-4 w-4" />
+                Exportar CSV
+              </Button>
+            )}
+          </div>
 
           {vendasFiltradas.length === 0 ? (
             <Card>
