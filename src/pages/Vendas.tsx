@@ -100,7 +100,7 @@ export default function Vendas() {
 
   // Chart data: daily revenue
   const chartData = useMemo(() => {
-    const days = eachDayInInterval({ start: dateRange.start, end: dateRange.end });
+    const days = eachDayOfInterval({ start: dateRange.start, end: dateRange.end });
     return days.map(day => {
       const dayStr = format(day, 'yyyy-MM-dd');
       const total = vendasFiltradas
