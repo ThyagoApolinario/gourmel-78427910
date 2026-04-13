@@ -1,4 +1,5 @@
-import { Package, BookOpen, CakeSlice, LogOut, Tags } from 'lucide-react';
+import { Package, BookOpen, LogOut, Tags } from 'lucide-react';
+import logoGourmel from '@/assets/Logo_Gourmel.jpeg';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -34,7 +35,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>
             <div className="flex items-center gap-2">
-              <CakeSlice className="h-4 w-4 text-primary" />
+              <img src={logoGourmel} alt="Gourmel" className="h-6 w-6 rounded-full object-cover" />
               {!collapsed && <span className="font-semibold">Gourmel Doce Gestão</span>}
             </div>
           </SidebarGroupLabel>
