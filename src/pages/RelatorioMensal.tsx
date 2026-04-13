@@ -7,12 +7,11 @@ import { AppLayout } from '@/components/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { formatarCusto } from '@/lib/smart-units';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend,
+  PieChart, Pie, Cell,
 } from 'recharts';
-import { CalendarRange, Trophy, TrendingUp, ShoppingBag, PawPrint } from 'lucide-react';
+import { CalendarRange, Trophy, TrendingUp, ShoppingBag, PawPrint, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, subMonths, eachDayOfInterval, getDaysInMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -36,6 +35,28 @@ function buildMonthOptions() {
   return options;
 }
 
+function VariacaoBadge({ atual, anterior }: { atual: number; anterior: number }) {
+  if (anterior === 0 && atual === 0) return null;
+  if (anterior === 0) return (
+    <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-emerald-600">
+      <ArrowUpRight className="h-3 w-3" /> novo
+    </span>
+  );
+  const pct = ((atual - anterior) / anterior) * 100;
+  if (pct === 0) return (
+    <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground">
+      <Minus className="h-3 w-3" /> 0%
+    </span>
+  );
+  const isUp = pct > 0;
+  return (
+    <span className={`inline-flex items-center gap-0.5 text-[10px] font-medium ${isUp ? 'text-emerald-600' : 'text-red-500'}`}>
+      {isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+      {isUp ? '+' : ''}{pct.toFixed(1).replace('.', ',')}%
+    </span>
+  );
+}
+
 export default function RelatorioMensal() {
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -46,6 +67,11 @@ export default function RelatorioMensal() {
   const inicioMes = startOfMonth(new Date(ano, mes - 1, 1));
   const fimMes = endOfMonth(inicioMes);
 
+  const mesAnteriorDate = subMonths(inicioMes, 1);
+  const inicioMesAnterior = startOfMonth(mesAnteriorDate);
+  const fimMesAnterior = endOfMonth(mesAnteriorDate);
+
+  // Current month sales
   const { data: vendas = [] } = useQuery({
     queryKey: ['relatorio-mensal', user?.id, mesSelecionado],
     queryFn: async () => {
@@ -62,11 +88,33 @@ export default function RelatorioMensal() {
     enabled: !!user,
   });
 
-  // KPIs
+  // Previous month sales (for comparison)
+  const { data: vendasAnterior = [] } = useQuery({
+    queryKey: ['relatorio-mensal-anterior', user?.id, mesSelecionado],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('vendas')
+        .select('preco_venda, quantidade, data_venda')
+        .eq('user_id', user!.id)
+        .gte('data_venda', format(inicioMesAnterior, 'yyyy-MM-dd'))
+        .lte('data_venda', format(fimMesAnterior, 'yyyy-MM-dd'));
+      if (error) throw error;
+      return data as any[];
+    },
+    enabled: !!user,
+  });
+
+  // Current KPIs
   const totalFaturamento = vendas.reduce((s, v) => s + v.preco_venda * v.quantidade, 0);
   const totalUnidades = vendas.reduce((s, v) => s + v.quantidade, 0);
   const ticketMedio = vendas.length > 0 ? totalFaturamento / vendas.length : 0;
   const diasComVenda = new Set(vendas.map((v: any) => v.data_venda)).size;
+
+  // Previous KPIs
+  const prevFaturamento = vendasAnterior.reduce((s: number, v: any) => s + v.preco_venda * v.quantidade, 0);
+  const prevUnidades = vendasAnterior.reduce((s: number, v: any) => s + v.quantidade, 0);
+  const prevTicketMedio = vendasAnterior.length > 0 ? prevFaturamento / vendasAnterior.length : 0;
+  const prevDiasComVenda = new Set(vendasAnterior.map((v: any) => v.data_venda)).size;
 
   // Daily chart
   const dailyData = useMemo(() => {
@@ -104,7 +152,12 @@ export default function RelatorioMensal() {
     return Object.values(map).sort((a, b) => b.qtd - a.qtd);
   }, [vendas]);
 
-  const mesLabel = meses.find(m => m.value === mesSelecionado)?.label || mesSelecionado;
+  const kpis = [
+    { label: 'Faturamento', value: `R$ ${totalFaturamento.toFixed(2).replace('.', ',')}`, icon: TrendingUp, atual: totalFaturamento, anterior: prevFaturamento },
+    { label: 'Unidades', value: totalUnidades.toString(), icon: ShoppingBag, atual: totalUnidades, anterior: prevUnidades },
+    { label: 'Ticket Médio', value: `R$ ${ticketMedio.toFixed(2).replace('.', ',')}`, icon: PawPrint, atual: ticketMedio, anterior: prevTicketMedio },
+    { label: 'Dias com venda', value: `${diasComVenda}/${getDaysInMonth(inicioMes)}`, icon: CalendarRange, atual: diasComVenda, anterior: prevDiasComVenda },
+  ];
 
   return (
     <AppLayout>
@@ -132,14 +185,9 @@ export default function RelatorioMensal() {
           </Select>
         </div>
 
-        {/* KPIs */}
+        {/* KPIs with comparison */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { label: 'Faturamento', value: `R$ ${totalFaturamento.toFixed(2).replace('.', ',')}`, icon: TrendingUp },
-            { label: 'Unidades', value: totalUnidades.toString(), icon: ShoppingBag },
-            { label: 'Ticket Médio', value: `R$ ${ticketMedio.toFixed(2).replace('.', ',')}`, icon: PawPrint },
-            { label: 'Dias com venda', value: `${diasComVenda}/${getDaysInMonth(inicioMes)}`, icon: CalendarRange },
-          ].map(kpi => (
+          {kpis.map(kpi => (
             <Card key={kpi.label} className="border-primary/10">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-1">
@@ -147,6 +195,7 @@ export default function RelatorioMensal() {
                   <span className="text-xs text-muted-foreground">{kpi.label}</span>
                 </div>
                 <p className="text-xl font-bold">{kpi.value}</p>
+                <VariacaoBadge atual={kpi.atual} anterior={kpi.anterior} />
               </CardContent>
             </Card>
           ))}
@@ -178,7 +227,6 @@ export default function RelatorioMensal() {
 
         {/* Channel + Ranking side by side */}
         <div className="grid md:grid-cols-2 gap-4">
-          {/* Channel Pie */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Vendas por Canal</CardTitle>
@@ -215,7 +263,6 @@ export default function RelatorioMensal() {
             </CardContent>
           </Card>
 
-          {/* Product Ranking */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
