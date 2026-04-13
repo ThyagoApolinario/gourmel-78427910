@@ -26,7 +26,7 @@ const CANINE_LABELS = {
   novoInsumo: 'Novo Ingrediente Natural',
   custoInsumos: 'Custo de Ingredientes Naturais',
   sucessoPreco: 'Preço sugerido gerado com sucesso! Lucro garantido, saúde no prato. 🐶',
-  heroTitle: 'A Essência Natural na Tigela do Seu Cão',
+  heroTitle: 'A Essência Natural para Seu Cão',
   heroSubtitle: 'Precificação sem corantes, sem glúten. Construa seu negócio de confeitaria pet com amor e precisão.',
   welcomeBack: 'Bem-vinda de volta! 🐾',
 };
