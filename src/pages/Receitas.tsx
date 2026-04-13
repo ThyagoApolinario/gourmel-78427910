@@ -15,7 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { formatarCusto } from '@/lib/smart-units';
-import { Plus, Trash2, BookOpen, Calculator, Package, CakeSlice, Clock, Scale, Cookie, AlertTriangle, Check, Pencil, X } from 'lucide-react';
+import { Plus, Trash2, BookOpen, Calculator, Package, CakeSlice, Clock, Scale, Cookie, AlertTriangle, Check, Pencil, X, Search } from 'lucide-react';
 import { PrecificacaoCard } from '@/components/PrecificacaoCard';
 import { HelpTooltip } from '@/components/HelpTooltip';
 
@@ -99,6 +99,7 @@ export default function Receitas() {
   const [addFator, setAddFator] = useState('1');
   const [addUnidade, setAddUnidade] = useState<UnidadeMedida>('g');
   const [unitWarning, setUnitWarning] = useState<string | null>(null);
+  const [buscaReceita, setBuscaReceita] = useState('');
 
   // Inline editing state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -380,8 +381,18 @@ export default function Receitas() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-3">
-              {receitas.map(r => (
+            <div className="space-y-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar receita por nome..."
+                  value={buscaReceita}
+                  onChange={e => setBuscaReceita(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <div className="grid gap-3">
+              {receitas.filter(r => !buscaReceita || r.nome.toLowerCase().includes(buscaReceita.toLowerCase())).map(r => (
                 <Card key={r.id} className="cursor-pointer hover:border-primary/30 active:bg-muted/30 transition-colors" onClick={() => setSelectedReceita(r.id)}>
                   <CardContent className="p-3 sm:p-4 flex items-center justify-between">
                     <div className="min-w-0 flex-1">
