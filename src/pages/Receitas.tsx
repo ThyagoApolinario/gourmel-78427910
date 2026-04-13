@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,11 +12,39 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { formatarCusto } from '@/lib/smart-units';
-import { Plus, Trash2, BookOpen, Calculator, Package, CakeSlice, Clock, Scale, Cookie } from 'lucide-react';
+import { Plus, Trash2, BookOpen, Calculator, Package, CakeSlice, Clock, Scale, Cookie, AlertTriangle } from 'lucide-react';
 import { PrecificacaoCard } from '@/components/PrecificacaoCard';
 import { HelpTooltip } from '@/components/HelpTooltip';
+
+type UnidadeMedida = 'g' | 'kg' | 'ml' | 'l' | 'un';
+
+// Conversion factor: how many "from" units fit in one "to" unit
+function getConversionFactor(insumoUnit: UnidadeMedida, receitaUnit: UnidadeMedida): number | null {
+  // Same unit = no conversion
+  if (insumoUnit === receitaUnit) return 1;
+
+  const conversions: Record<string, number> = {
+    'kg->g': 1000,
+    'g->kg': 0.001,
+    'l->ml': 1000,
+    'ml->l': 0.001,
+  };
+
+  const key = `${insumoUnit}->${receitaUnit}`;
+  return conversions[key] ?? null; // null = incompatible
+}
+
+function areUnitsCompatible(a: UnidadeMedida, b: UnidadeMedida): boolean {
+  if (a === b) return true;
+  const weight: UnidadeMedida[] = ['g', 'kg'];
+  const volume: UnidadeMedida[] = ['ml', 'l'];
+  if (weight.includes(a) && weight.includes(b)) return true;
+  if (volume.includes(a) && volume.includes(b)) return true;
+  return false;
+}
 
 interface Insumo {
   id: string;
@@ -31,6 +59,7 @@ interface Composicao {
   insumo_id: string;
   quantidade: number;
   fator_rendimento: number;
+  unidade_medida: UnidadeMedida;
   insumo?: Insumo;
 }
 
@@ -68,6 +97,8 @@ export default function Receitas() {
   const [addInsumoId, setAddInsumoId] = useState('');
   const [addQtd, setAddQtd] = useState('');
   const [addFator, setAddFator] = useState('1');
+  const [addUnidade, setAddUnidade] = useState<UnidadeMedida>('g');
+  const [unitWarning, setUnitWarning] = useState<string | null>(null);
 
   const { data: receitas = [] } = useQuery({
     queryKey: ['receitas'],
@@ -95,6 +126,29 @@ export default function Receitas() {
       return data as Insumo[];
     },
   });
+
+  // Auto-fill unit when insumo is selected
+  useEffect(() => {
+    if (addInsumoId) {
+      const insumo = insumos.find(i => i.id === addInsumoId);
+      if (insumo) {
+        setAddUnidade(insumo.unidade_medida as UnidadeMedida);
+        setUnitWarning(null);
+      }
+    }
+  }, [addInsumoId, insumos]);
+
+  // Check unit compatibility
+  useEffect(() => {
+    if (addInsumoId && addUnidade) {
+      const insumo = insumos.find(i => i.id === addInsumoId);
+      if (insumo && !areUnitsCompatible(insumo.unidade_medida as UnidadeMedida, addUnidade)) {
+        setUnitWarning(`Atenção: "${insumo.nome}" é cadastrado em ${insumo.unidade_medida}, mas você selecionou ${addUnidade}. Unidades incompatíveis!`);
+      } else {
+        setUnitWarning(null);
+      }
+    }
+  }, [addUnidade, addInsumoId, insumos]);
 
   const { data: composicao = [] } = useQuery({
     queryKey: ['composicao', selectedReceita],
@@ -139,6 +193,7 @@ export default function Receitas() {
         insumo_id: addInsumoId,
         quantidade: parseFloat(addQtd),
         fator_rendimento: parseFloat(addFator) || 1,
+        unidade_medida: addUnidade,
       });
       if (error) throw error;
     },
@@ -174,11 +229,25 @@ export default function Receitas() {
     onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
   });
 
-  // Cost calculations
+  // Cost calculations with unit conversion
   const calcItemCost = (c: Composicao) => {
-    const custoUn = c.insumo?.custo_unitario ?? 0;
+    const custoUn = c.insumo?.custo_unitario ?? 0; // cost per insumo unit (e.g. per g, per ml)
+    const insumoUnit = (c.insumo?.unidade_medida ?? 'g') as UnidadeMedida;
+    const receitaUnit = c.unidade_medida as UnidadeMedida;
     const fator = c.fator_rendimento || 1;
-    return (c.quantidade * custoUn) / fator;
+
+    // Convert: if insumo is in kg (custo per g) and recipe uses g, factor = 1
+    // getConversionFactor returns how many receitaUnits per insumoUnit
+    const convFactor = getConversionFactor(insumoUnit, receitaUnit);
+    if (convFactor === null) {
+      // Incompatible units — use direct calc as fallback
+      return (c.quantidade * custoUn) / fator;
+    }
+    // custoUn is price per insumo base unit. 
+    // If insumo is kg and custo_unitario = price/kg, recipe uses g:
+    // cost = qty_g * (price_per_kg / 1000) / fator
+    // convFactor (kg->g) = 1000, so: cost = qty * custoUn / convFactor / fator
+    return (c.quantidade * custoUn) / convFactor / fator;
   };
 
   const ingredientesComp = composicao.filter(c => c.insumo?.categoria === 'ingrediente');
@@ -372,39 +441,61 @@ export default function Receitas() {
                 <CardTitle className="text-base">Adicionar Insumo à Receita</CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={e => { e.preventDefault(); addComposicaoMutation.mutate(); }} className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
-                  <div className="space-y-1 sm:col-span-2">
-                    <Label className="text-xs">Insumo</Label>
-                    <Select value={addInsumoId} onValueChange={setAddInsumoId}>
-                      <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                      <SelectContent>
-                        {insumos.map(i => (
-                          <SelectItem key={i.id} value={i.id}>
-                            {i.categoria === 'embalagem' ? '📦' : '🧈'} {i.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Quantidade</Label>
-                    <Input type="number" step="0.01" min="0" value={addQtd} onChange={e => setAddQtd(e.target.value)} placeholder="0" required />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs flex items-center gap-1">Fator Rend. <HelpTooltip field="fator_rendimento" /></Label>
-                    <div className="flex gap-2">
-                      <Input type="number" step="0.01" min="0.01" max="2" value={addFator} onChange={e => setAddFator(e.target.value)} placeholder="1.0" />
-                      <Button type="submit" disabled={!addInsumoId || addComposicaoMutation.isPending} size="icon" className="shrink-0">
-                        <Plus className="h-4 w-4" />
-                      </Button>
+                <form onSubmit={e => { e.preventDefault(); addComposicaoMutation.mutate(); }} className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1 sm:col-span-2">
+                      <Label className="text-xs">Insumo</Label>
+                      <Select value={addInsumoId} onValueChange={setAddInsumoId}>
+                        <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                        <SelectContent>
+                          {insumos.map(i => (
+                            <SelectItem key={i.id} value={i.id}>
+                              {i.categoria === 'embalagem' ? '📦' : '🧈'} {i.nome} <span className="text-muted-foreground">({i.unidade_medida})</span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Quantidade + Unidade</Label>
+                      <div className="flex gap-2">
+                        <Input type="number" step="0.01" min="0" value={addQtd} onChange={e => setAddQtd(e.target.value)} placeholder="0" required className="flex-1" />
+                        <Select value={addUnidade} onValueChange={v => setAddUnidade(v as UnidadeMedida)}>
+                          <SelectTrigger className="w-24">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="g">g</SelectItem>
+                            <SelectItem value="kg">kg</SelectItem>
+                            <SelectItem value="ml">ml</SelectItem>
+                            <SelectItem value="l">L</SelectItem>
+                            <SelectItem value="un">un</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs flex items-center gap-1">Fator Rend. <HelpTooltip field="fator_rendimento" /></Label>
+                      <div className="flex gap-2">
+                        <Input type="number" step="0.01" min="0.01" max="2" value={addFator} onChange={e => setAddFator(e.target.value)} placeholder="1.0" />
+                        <Button type="submit" disabled={!addInsumoId || !!unitWarning || addComposicaoMutation.isPending} size="icon" className="shrink-0">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
+                  {unitWarning && (
+                    <Alert variant="destructive" className="py-2">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription className="text-xs">{unitWarning}</AlertDescription>
+                    </Alert>
+                  )}
+                  {parseFloat(addFator) < 1 && parseFloat(addFator) > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      ⚠️ Fator {addFator} = {((1 - parseFloat(addFator)) * 100).toFixed(0)}% de perda — o custo será ajustado para cima
+                    </p>
+                  )}
                 </form>
-                {parseFloat(addFator) < 1 && parseFloat(addFator) > 0 && (
-                  <p className="text-xs text-muted-foreground mt-2">
-                    ⚠️ Fator {addFator} = {((1 - parseFloat(addFator)) * 100).toFixed(0)}% de perda — o custo será ajustado para cima
-                  </p>
-                )}
               </CardContent>
             </Card>
 
@@ -432,7 +523,7 @@ export default function Receitas() {
                                 <span className="font-medium text-sm">{c.insumo?.nome}</span>
                               </div>
                             </TableCell>
-                            <TableCell className="text-sm">{c.quantidade} {c.insumo?.unidade_medida}</TableCell>
+                            <TableCell className="text-sm">{c.quantidade} {c.unidade_medida}</TableCell>
                             <TableCell>
                               {c.fator_rendimento !== 1 ? (
                                 <Badge variant="outline" className="text-xs">{c.fator_rendimento}</Badge>
