@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { PawPrint, Plus, Minus, Trash2, ShoppingBag, CalendarIcon, Filter, TrendingUp } from 'lucide-react';
-import { format, subDays, subMonths, startOfDay, endOfDay, eachDayInInterval, isWithinInterval } from 'date-fns';
+import { format, subDays, subMonths, startOfDay, endOfDay, eachDayOfInterval, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
