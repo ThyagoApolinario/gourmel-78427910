@@ -358,6 +358,7 @@ export default function Receitas() {
               custoEmbalagens={custoEmbalagens}
               tempoProducao={receitaSelecionada.tempo_producao_minutos}
               rendimentoQuantidade={receitaSelecionada.rendimento_quantidade}
+              rendimentoUnidade={receitaSelecionada.rendimento_unidade}
               receitaId={receitaSelecionada.id}
               margemSalva={receitaSelecionada.margem_desejada}
             />
