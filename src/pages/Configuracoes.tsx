@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Settings, Clock, DollarSign, Calculator } from 'lucide-react';
+import { HelpTooltip } from '@/components/HelpTooltip';
 
 interface ConfigFinanceira {
   id: string;
@@ -120,7 +121,7 @@ export default function Configuracoes() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Taxa de Cartão/Plataforma (%)</Label>
+                  <Label className="flex items-center gap-1.5">Taxa de Cartão/Plataforma (%) <HelpTooltip field="taxa_cartao" /></Label>
                   <Input
                     type="number"
                     step="0.1"
@@ -132,7 +133,7 @@ export default function Configuracoes() {
                   <p className="text-xs text-muted-foreground">Ex: 5% por venda via iFood/cartão</p>
                 </div>
                 <div className="space-y-2">
-                  <Label>Impostos - MEI/Simples (%)</Label>
+                  <Label className="flex items-center gap-1.5">Impostos - MEI/Simples (%) <HelpTooltip field="impostos" /></Label>
                   <Input
                     type="number"
                     step="0.1"
@@ -145,7 +146,7 @@ export default function Configuracoes() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Margem de Contribuição Desejada (%)</Label>
+                <Label className="flex items-center gap-1.5">Margem de Contribuição Desejada (%) <HelpTooltip field="margem_contribuicao" /></Label>
                 <Input
                   type="number"
                   step="1"
@@ -171,7 +172,7 @@ export default function Configuracoes() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Pró-labore Desejado (R$)</Label>
+                  <Label className="flex items-center gap-1.5">Pró-labore Desejado (R$) <HelpTooltip field="pro_labore" /></Label>
                   <Input
                     type="number"
                     step="100"
@@ -181,7 +182,7 @@ export default function Configuracoes() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Horas Trabalhadas/Mês</Label>
+                  <Label className="flex items-center gap-1.5">Horas Trabalhadas/Mês <HelpTooltip field="horas_mes" /></Label>
                   <Input
                     type="number"
                     step="1"
