@@ -537,7 +537,7 @@ export default function CustosFixos() {
                               </p>
                             )}
                           </div>
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(c)}>
                               <Edit2 className="h-3 w-3" />
                             </Button>
