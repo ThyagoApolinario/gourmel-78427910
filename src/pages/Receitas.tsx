@@ -100,29 +100,6 @@ export default function Receitas() {
   const [addUnidade, setAddUnidade] = useState<UnidadeMedida>('g');
   const [unitWarning, setUnitWarning] = useState<string | null>(null);
 
-  // Auto-fill unit when insumo is selected
-  useEffect(() => {
-    if (addInsumoId) {
-      const insumo = insumos.find(i => i.id === addInsumoId);
-      if (insumo) {
-        setAddUnidade(insumo.unidade_medida as UnidadeMedida);
-        setUnitWarning(null);
-      }
-    }
-  }, [addInsumoId, insumos]);
-
-  // Check unit compatibility
-  useEffect(() => {
-    if (addInsumoId && addUnidade) {
-      const insumo = insumos.find(i => i.id === addInsumoId);
-      if (insumo && !areUnitsCompatible(insumo.unidade_medida as UnidadeMedida, addUnidade)) {
-        setUnitWarning(`Atenção: "${insumo.nome}" é cadastrado em ${insumo.unidade_medida}, mas você selecionou ${addUnidade}. Unidades incompatíveis!`);
-      } else {
-        setUnitWarning(null);
-      }
-    }
-  }, [addUnidade, addInsumoId, insumos]);
-
   const { data: receitas = [] } = useQuery({
     queryKey: ['receitas'],
     queryFn: async () => {
@@ -149,6 +126,29 @@ export default function Receitas() {
       return data as Insumo[];
     },
   });
+
+  // Auto-fill unit when insumo is selected
+  useEffect(() => {
+    if (addInsumoId) {
+      const insumo = insumos.find(i => i.id === addInsumoId);
+      if (insumo) {
+        setAddUnidade(insumo.unidade_medida as UnidadeMedida);
+        setUnitWarning(null);
+      }
+    }
+  }, [addInsumoId, insumos]);
+
+  // Check unit compatibility
+  useEffect(() => {
+    if (addInsumoId && addUnidade) {
+      const insumo = insumos.find(i => i.id === addInsumoId);
+      if (insumo && !areUnitsCompatible(insumo.unidade_medida as UnidadeMedida, addUnidade)) {
+        setUnitWarning(`Atenção: "${insumo.nome}" é cadastrado em ${insumo.unidade_medida}, mas você selecionou ${addUnidade}. Unidades incompatíveis!`);
+      } else {
+        setUnitWarning(null);
+      }
+    }
+  }, [addUnidade, addInsumoId, insumos]);
 
   const { data: composicao = [] } = useQuery({
     queryKey: ['composicao', selectedReceita],
