@@ -91,6 +91,39 @@ export const HELP_TOPICS: HelpTopic[] = [
       'Um produto classificado como "Cão" não é necessariamente ruim. Antes de remover do cardápio, considere:\n\n1. Rever a receita — Trocar insumos caros por alternativas mais baratas\n2. Aumentar o preço — Talvez o preço esteja muito baixo\n3. Fazer promoções cruzadas — Vender junto com Estrelas\n4. Reduzir o tempo de produção — Simplificar a decoração\n5. Remover do cardápio — Se nada funcionar, libere espaço para produtos melhores\n\nO importante é tomar essa decisão com dados, não com intuição!',
     categoria: 'bi',
   },
+  // Dicas Práticas
+  {
+    id: 'armazenamento-insumos',
+    titulo: 'Como armazenar insumos corretamente?',
+    resumo: 'Conserve seus ingredientes e evite desperdício',
+    conteudo:
+      'O armazenamento correto dos insumos protege a qualidade dos seus produtos e evita prejuízo com perdas:\n\n🧊 Refrigerados (2°C a 8°C): manteigas, cremes, frutas frescas, leite e ovos. Sempre tampados e identificados com data.\n\n🌡️ Congelados (-18°C): massas prontas, polpas de frutas, chocolates moldados. Use embalagens herméticas para evitar queima de frio.\n\n🏠 Temperatura ambiente: farinhas, açúcares, cacau em pó. Guarde em potes fechados, longe da umidade e da luz direta.\n\n💡 Dica de ouro: Use a regra PVPS (Primeiro que Vence, Primeiro que Sai). Coloque os produtos mais antigos na frente para usar antes!\n\n📋 Etiquete tudo: coloque o nome, a data de abertura e a validade em cada pote. Isso evita surpresas desagradáveis.',
+    categoria: 'dicas',
+  },
+  {
+    id: 'fotografar-produtos',
+    titulo: 'Como fotografar seus produtos para venda?',
+    resumo: 'Dicas simples para fotos que vendem mais',
+    conteudo:
+      'Fotos bonitas fazem toda a diferença nas vendas — e você não precisa de equipamento profissional!\n\n📱 Com o celular:\n• Use luz natural (perto de uma janela, nunca sob luz amarela direta)\n• Limpe a câmera antes de fotografar\n• Ative o modo retrato para desfocar o fundo\n\n🎨 Composição:\n• Fundo limpo e neutro (papel cartão branco ou madeira clara)\n• Adicione elementos que contem uma história: espátula, ingredientes, flores\n• Fotografe de cima (flat lay) para bolos redondos e de lado para bolos altos\n\n✨ Edição rápida:\n• Aumente levemente o brilho e a saturação\n• Ajuste o balanço de branco para cores fiéis\n• Use apps gratuitos como Snapseed ou Lightroom Mobile\n\n🚫 Evite:\n• Flash (deixa o doce com aparência artificial)\n• Fundos bagunçados\n• Fotos escuras ou tremidas',
+    categoria: 'dicas',
+  },
+  {
+    id: 'dicas-embalagem',
+    titulo: 'Embalagem: como embalar com carinho e economia?',
+    resumo: 'Proteja seus produtos e encante seus clientes',
+    conteudo:
+      'A embalagem é o primeiro contato visual do cliente com o seu produto — ela comunica profissionalismo e cuidado.\n\n📦 Escolhendo a embalagem certa:\n• Bolos: caixas de papelão com visor (o cliente adora espiar!)\n• Brigadeiros/docinhos: forminhas em caixas com berço\n• Cookies: saquinhos transparentes com lacre\n• Tortas: caixas rígidas para proteger a decoração\n\n💰 Economizando sem perder qualidade:\n• Compre embalagens no atacado (economize até 40%)\n• Padronize tamanhos para reduzir variedade de estoque\n• Use adesivos personalizados em vez de caixas impressas\n\n🎀 Toques especiais que encantam:\n• Cartãozinho de agradecimento escrito à mão\n• Fita de cetim ou barbante rústico\n• Instruções de conservação e validade\n• QR Code para suas redes sociais\n\n⚠️ Não esqueça: inclua SEMPRE o custo da embalagem na sua ficha técnica! Cadastre cada item como insumo do tipo "Embalagem" no sistema.',
+    categoria: 'dicas',
+  },
+  {
+    id: 'higiene-cozinha',
+    titulo: 'Boas práticas de higiene na cozinha',
+    resumo: 'Segurança alimentar para confeitaria artesanal',
+    conteudo:
+      'A higiene é a base de tudo na confeitaria. Além de proteger seus clientes, evita desperdício e retrabalho:\n\n🧼 Antes de começar:\n• Lave bem as mãos com água e sabão por 20 segundos\n• Prenda o cabelo e use avental limpo\n• Higienize a bancada com álcool 70%\n\n🍳 Durante a produção:\n• Não prove com a mesma colher que mexe\n• Separe utensílios para alimentos crus e prontos\n• Mantenha panos de prato sempre limpos e secos\n\n🧹 Após a produção:\n• Lave todos os utensílios imediatamente\n• Limpe o forno e a bancada\n• Descarte resíduos corretamente\n\n📋 Documentação:\n• Mantenha um caderno de controle de validade\n• Anote temperaturas da geladeira diariamente\n• Guarde notas fiscais dos insumos por segurança',
+    categoria: 'dicas',
+  },
   // Geral
   {
     id: 'primeiros-passos',
@@ -106,5 +139,6 @@ export const CATEGORIA_LABELS: Record<string, string> = {
   insumos: '🧈 Insumos',
   precificacao: '💰 Precificação',
   bi: '📊 Inteligência de Negócio',
+  dicas: '✨ Dicas Práticas',
   geral: '📋 Geral',
 };
