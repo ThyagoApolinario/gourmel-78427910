@@ -13,6 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import { formatarCusto } from '@/lib/smart-units';
 import { Plus, Pencil, Trash2, Package } from 'lucide-react';
 import { OnboardingChecklist } from '@/components/OnboardingChecklist';
+import HeroBanner from '@/components/HeroBanner';
+import { useProfile } from '@/hooks/useProfile';
 
 interface Insumo {
   id: string;
@@ -33,6 +35,7 @@ export default function Insumos() {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Insumo | null>(null);
+  const { labels } = useProfile();
 
   const { data: insumos = [], isLoading } = useQuery({
     queryKey: ['insumos'],
@@ -107,11 +110,12 @@ export default function Insumos() {
   return (
     <AppLayout>
       <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+        <HeroBanner />
         <OnboardingChecklist />
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold">Insumos</h1>
-            <p className="text-muted-foreground text-xs sm:text-sm">Gerencie matérias-primas e embalagens</p>
+            <h1 className="text-xl sm:text-2xl font-bold">{labels.insumos}</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm">{labels.insumosDesc}</p>
           </div>
           {!showForm && !editing && (
             <Button onClick={() => setShowForm(true)} className="shrink-0 h-10">

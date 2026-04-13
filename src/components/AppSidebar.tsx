@@ -1,8 +1,9 @@
-import { Package, BookOpen, LogOut, Tags, Settings, BarChart3, UserCircle, HelpCircle } from 'lucide-react';
+import { Package, BookOpen, LogOut, Tags, Settings, BarChart3, UserCircle, HelpCircle, Dog } from 'lucide-react';
 import logoGourmel from '@/assets/Logo_Gourmel.jpeg';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
 import {
   Sidebar,
   SidebarContent,
@@ -17,21 +18,22 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 
-const menuItems = [
-  { title: 'Insumos', url: '/', icon: Package },
-  { title: 'Receitas', url: '/receitas', icon: BookOpen },
-  { title: 'Categorias', url: '/categorias', icon: Tags },
-  { title: 'Dashboard', url: '/dashboard', icon: BarChart3 },
-  { title: 'Configurações', url: '/configuracoes', icon: Settings },
-  { title: 'Meu Perfil', url: '/perfil', icon: UserCircle },
-  { title: 'Ajuda', url: '/ajuda', icon: HelpCircle },
-];
-
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const location = useLocation();
   const { signOut } = useAuth();
+  const { profile, labels } = useProfile();
+
+  const menuItems = [
+    { title: labels.insumos, url: '/', icon: profile === 'canine' ? Dog : Package },
+    { title: labels.receitas, url: '/receitas', icon: BookOpen },
+    { title: labels.categorias, url: '/categorias', icon: Tags },
+    { title: labels.dashboard, url: '/dashboard', icon: BarChart3 },
+    { title: labels.configuracoes, url: '/configuracoes', icon: Settings },
+    { title: labels.perfil, url: '/perfil', icon: UserCircle },
+    { title: labels.ajuda, url: '/ajuda', icon: HelpCircle },
+  ];
 
   return (
     <Sidebar collapsible="icon">
@@ -40,13 +42,13 @@ export function AppSidebar() {
           <SidebarGroupLabel>
             <div className="flex items-center gap-2">
               <img src={logoGourmel} alt="Gourmel" className="h-7 w-7 object-contain" />
-              {!collapsed && <span className="font-semibold">Gourmel Doce Gestão</span>}
+              {!collapsed && <span className="font-semibold text-xs">{labels.appName}</span>}
             </div>
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}

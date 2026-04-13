@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { ProfileProvider } from "@/hooks/useProfile";
 import Auth from "./pages/Auth";
 import Insumos from "./pages/Insumos";
 import Receitas from "./pages/Receitas";
@@ -53,10 +54,12 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/*" element={<ProtectedRoutes />} />
-          </Routes>
+          <ProfileProvider>
+            <Routes>
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/*" element={<ProtectedRoutes />} />
+            </Routes>
+          </ProfileProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
