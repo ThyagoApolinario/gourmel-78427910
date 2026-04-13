@@ -23,6 +23,7 @@ const menuItems = [
   { title: 'Categorias', url: '/categorias', icon: Tags },
   { title: 'Dashboard', url: '/dashboard', icon: BarChart3 },
   { title: 'Configurações', url: '/configuracoes', icon: Settings },
+  { title: 'Meu Perfil', url: '/perfil', icon: UserCircle },
 ];
 
 export function AppSidebar() {
