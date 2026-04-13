@@ -6,7 +6,7 @@ import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { TrendingUp, AlertTriangle, Target, DollarSign, Save } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Target, DollarSign, Save, Scale, Cookie } from 'lucide-react';
 import { formatarCusto } from '@/lib/smart-units';
 import { useToast } from '@/hooks/use-toast';
 
@@ -23,6 +23,7 @@ interface PrecificacaoCardProps {
   custoEmbalagens: number;
   tempoProducao: number | null;
   rendimentoQuantidade: number | null;
+  rendimentoUnidade?: string | null;
   receitaId: string;
   margemSalva: number | null;
 }
@@ -32,9 +33,13 @@ export function PrecificacaoCard({
   custoEmbalagens,
   tempoProducao,
   rendimentoQuantidade,
+  rendimentoUnidade,
   receitaId,
   margemSalva,
 }: PrecificacaoCardProps) {
+  const isGramas = rendimentoUnidade === 'g';
+  const unLabel = isGramas ? 'Grama' : 'Unidade';
+  const unAbrev = isGramas ? 'g' : 'un';
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
