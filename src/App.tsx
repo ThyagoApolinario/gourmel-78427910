@@ -10,12 +10,15 @@ import Receitas from "./pages/Receitas";
 import Categorias from "./pages/Categorias";
 import Configuracoes from "./pages/Configuracoes";
 import Dashboard from "./pages/Dashboard";
+import Perfil from "./pages/Perfil";
 import NotFound from "./pages/NotFound";
+import { useSessionGuard } from "./hooks/useSessionGuard";
 
 const queryClient = new QueryClient();
 
 function ProtectedRoutes() {
   const { user, loading } = useAuth();
+  useSessionGuard();
 
   if (loading) {
     return (
@@ -34,6 +37,7 @@ function ProtectedRoutes() {
       <Route path="/categorias" element={<Categorias />} />
       <Route path="/configuracoes" element={<Configuracoes />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/perfil" element={<Perfil />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
