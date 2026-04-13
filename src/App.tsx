@@ -12,6 +12,7 @@ import Configuracoes from "./pages/Configuracoes";
 import Dashboard from "./pages/Dashboard";
 import Perfil from "./pages/Perfil";
 import Ajuda from "./pages/Ajuda";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import { useSessionGuard } from "./hooks/useSessionGuard";
 
