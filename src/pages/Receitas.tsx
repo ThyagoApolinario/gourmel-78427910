@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { formatarCusto } from '@/lib/smart-units';
 import { Plus, Trash2, BookOpen, Calculator, Package, CakeSlice, Clock } from 'lucide-react';
 import { PrecificacaoCard } from '@/components/PrecificacaoCard';
+import { HelpTooltip } from '@/components/HelpTooltip';
 
 interface Insumo {
   id: string;
@@ -233,7 +234,7 @@ export default function Receitas() {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-2">
-                      <Label>Rendimento</Label>
+                      <Label className="flex items-center gap-1.5">Rendimento <HelpTooltip field="rendimento" /></Label>
                       <Input type="number" value={formRendQtd} onChange={e => setFormRendQtd(e.target.value)} placeholder="Ex: 12" />
                     </div>
                     <div className="space-y-2">
@@ -242,7 +243,7 @@ export default function Receitas() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> Tempo de Produção (min)</Label>
+                    <Label className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Tempo de Produção (min) <HelpTooltip field="tempo_producao" /></Label>
                     <Input type="number" min="0" value={formTempoMin} onChange={e => setFormTempoMin(e.target.value)} placeholder="Ex: 120" />
                   </div>
                 </div>
@@ -364,7 +365,7 @@ export default function Receitas() {
                     <Input type="number" step="0.01" min="0" value={addQtd} onChange={e => setAddQtd(e.target.value)} placeholder="0" required />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs">Fator Rend.</Label>
+                    <Label className="text-xs flex items-center gap-1">Fator Rend. <HelpTooltip field="fator_rendimento" /></Label>
                     <div className="flex gap-2">
                       <Input type="number" step="0.01" min="0.01" max="2" value={addFator} onChange={e => setAddFator(e.target.value)} placeholder="1.0" />
                       <Button type="submit" disabled={!addInsumoId || addComposicaoMutation.isPending} size="icon" className="shrink-0">

@@ -308,13 +308,34 @@ export default function Dashboard() {
         </div>
 
         {!hasData ? (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <BarChart3 className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Sem dados de vendas</h3>
-              <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                Registre vendas nas suas receitas para ver a Matriz de Engenharia de Cardápio.
-                O sistema precisa de dados de volume e preço de venda para classificar seus produtos.
+          <Card className="border-primary/20">
+            <CardContent className="p-8 sm:p-12 text-center space-y-4">
+              <BarChart3 className="h-16 w-16 mx-auto text-primary/30 mb-2" />
+              <h3 className="text-lg font-semibold">Sua Matriz de Cardápio vai aparecer aqui ✨</h3>
+              <p className="text-muted-foreground text-sm max-w-lg mx-auto">
+                A Engenharia de Cardápio é uma ferramenta usada por restaurantes profissionais para descobrir quais produtos
+                são os verdadeiros campeões do seu negócio — e quais estão roubando seu tempo sem dar retorno.
+              </p>
+              <div className="grid grid-cols-2 gap-3 max-w-md mx-auto text-left text-xs">
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="font-semibold mb-1">⭐ Estrelas</p>
+                  <p className="text-muted-foreground">Vendem muito e dão lucro. Seus campeões!</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="font-semibold mb-1">⚡ Cavalos de Carga</p>
+                  <p className="text-muted-foreground">Vendem muito, mas o lucro é baixo.</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="font-semibold mb-1">🧩 Quebra-cabeças</p>
+                  <p className="text-muted-foreground">Dão lucro, mas precisam vender mais.</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="font-semibold mb-1">🐕 Cães</p>
+                  <p className="text-muted-foreground">Vendem pouco e dão pouco lucro.</p>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground pt-2">
+                Para começar, registre vendas nas suas receitas. O sistema precisa de dados de volume e preço para classificar seus produtos.
               </p>
             </CardContent>
           </Card>
