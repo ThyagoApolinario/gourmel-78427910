@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { CakeSlice } from 'lucide-react';
+import logoGourmel from '@/assets/Logo_Gourmel.jpeg';
 
 export default function Auth() {
   const { signIn, signUp } = useAuth();
