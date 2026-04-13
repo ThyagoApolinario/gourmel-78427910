@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { AppLayout } from '@/components/AppLayout';
 import { InsumoForm } from '@/components/InsumoForm';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,7 @@ interface Insumo {
 
 export default function Insumos() {
   const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
@@ -149,13 +151,13 @@ export default function Insumos() {
               title="🧈 Ingredientes"
               items={ingredientes}
               onEdit={setEditing}
-              onDelete={(id) => deleteMutation.mutate(id)}
+              onDelete={isAdmin ? (id) => deleteMutation.mutate(id) : undefined}
             />
             <InsumoTable
               title="📦 Embalagens"
               items={embalagens}
               onEdit={setEditing}
-              onDelete={(id) => deleteMutation.mutate(id)}
+              onDelete={isAdmin ? (id) => deleteMutation.mutate(id) : undefined}
             />
           </>
         )}
@@ -168,7 +170,7 @@ function InsumoTable({ title, items, onEdit, onDelete }: {
   title: string;
   items: Insumo[];
   onEdit: (i: Insumo) => void;
-  onDelete: (id: string) => void;
+  onDelete?: (id: string) => void;
 }) {
   if (items.length === 0) return null;
 
@@ -215,9 +217,11 @@ function InsumoTable({ title, items, onEdit, onDelete }: {
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(item)}>
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => onDelete(item.id)}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                      {onDelete && (
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => onDelete(item.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { AppLayout } from '@/components/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,6 +48,7 @@ interface Categoria {
 
 export default function Receitas() {
   const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedReceita, setSelectedReceita] = useState<string | null>(null);
@@ -265,9 +267,11 @@ export default function Receitas() {
                         <p className="text-xs text-muted-foreground mt-1">Rende: {r.rendimento_quantidade} {r.rendimento_unidade}</p>
                       )}
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive shrink-0" onClick={e => { e.stopPropagation(); deleteReceitaMutation.mutate(r.id); }}>
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                    {isAdmin && (
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive shrink-0" onClick={e => { e.stopPropagation(); deleteReceitaMutation.mutate(r.id); }}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               ))}
