@@ -9,7 +9,7 @@ interface ProfileContextType {
 }
 
 const CANINE_LABELS = {
-  appName: 'Gourmel Pet — Confeitaria Canina',
+  appName: 'Gourmel Pet — Confeitaria Canina Afetiva',
   appSubtitle: 'Sistema de gestão para confeitaria canina natural 🐾',
   insumos: 'Ingredientes Naturais',
   insumosDesc: 'Gerencie ingredientes e embalagens pet-friendly',
