@@ -166,6 +166,20 @@ export default function Dashboard() {
     },
   });
 
+  // Custos fixos for breakeven bar
+  const { data: custosFixos = [] } = useQuery({
+    queryKey: ['custos_fixos_dashboard', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('custos_fixos')
+        .select('valor_mensal, percentual_rateio')
+        .eq('user_id', user!.id);
+      if (error) throw error;
+      return data as { valor_mensal: number; percentual_rateio: number }[];
+    },
+    enabled: !!user,
+  });
+
   // Filtered vendas by period
   const vendasFiltradas = useMemo(() => {
     if (periodo === 'all') return vendas;
