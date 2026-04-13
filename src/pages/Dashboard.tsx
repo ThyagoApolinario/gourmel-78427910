@@ -27,6 +27,7 @@ interface Receita {
   nome: string;
   tempo_producao_minutos: number | null;
   rendimento_quantidade: number | null;
+  rendimento_unidade: string | null;
 }
 
 interface Composicao {
@@ -57,11 +58,13 @@ interface ProdutoAnalise {
   id: string;
   nome: string;
   volume: number;
+  volumeLabel: string;
   margemContribuicao: number;
   custoTotal: number;
   precoMedioVenda: number;
   tempoProducao: number | null;
   quadrante: Quadrante;
+  rendimentoUnidade: string;
 }
 
 const QUADRANTE_CONFIG: Record<Quadrante, {
@@ -247,7 +250,7 @@ export default function Dashboard() {
   const { data: receitas = [] } = useQuery({
     queryKey: ['receitas'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('receitas').select('id, nome, tempo_producao_minutos, rendimento_quantidade');
+      const { data, error } = await supabase.from('receitas').select('id, nome, tempo_producao_minutos, rendimento_quantidade, rendimento_unidade');
       if (error) throw error;
       return data as Receita[];
     },
@@ -323,7 +326,14 @@ export default function Dashboard() {
     const produtos: ProdutoAnalise[] = receitasComVendas.map(r => {
       const vData = vendasPorReceita[r.id];
       const volume = vData.totalQtd;
+      const unidade = r.rendimento_unidade || 'un';
+      const isPeso = unidade === 'g';
       const precoMedioVenda = vData.totalReceita / vData.totalQtd;
+
+      // Volume label adapts to unit
+      const volumeLabel = isPeso
+        ? (volume >= 1000 ? `${(volume / 1000).toFixed(1)} kg` : `${volume.toFixed(0)} g`)
+        : `${volume} un`;
 
       // Calculate cost per unit
       const comps = composicoes.filter(c => c.receita_id === r.id);
@@ -338,18 +348,20 @@ export default function Dashboard() {
       const custoTotalReceita = custoInsumos + custoMaoDeObra;
       const custoPorUnidade = r.rendimento_quantidade ? custoTotalReceita / r.rendimento_quantidade : custoTotalReceita;
 
-      // Margem de contribuição em R$ por unidade
+      // Margem de contribuição em R$ por unidade/grama
       const margemContribuicao = precoMedioVenda - custoPorUnidade;
 
       return {
         id: r.id,
         nome: r.nome,
         volume,
+        volumeLabel,
         margemContribuicao,
         custoTotal: custoPorUnidade,
         precoMedioVenda,
         tempoProducao: r.tempo_producao_minutos,
-        quadrante: 'cao' as Quadrante, // will be set below
+        quadrante: 'cao' as Quadrante,
+        rendimentoUnidade: unidade,
       };
     });
 
@@ -398,6 +410,8 @@ export default function Dashboard() {
     z: 100,
     nome: p.nome,
     quadrante: p.quadrante,
+    volumeLabel: p.volumeLabel,
+    rendimentoUnidade: p.rendimentoUnidade,
   }));
 
   const CustomTooltip = ({ active, payload }: any) => {
@@ -407,8 +421,8 @@ export default function Dashboard() {
     return (
       <div className="rounded-lg border bg-card p-3 shadow-lg text-sm">
         <p className="font-semibold">{d.nome}</p>
-        <p className="text-muted-foreground">Volume: {d.x} un</p>
-        <p className="text-muted-foreground">Margem: {formatarCusto(d.y)}</p>
+        <p className="text-muted-foreground">Volume: {d.volumeLabel}</p>
+        <p className="text-muted-foreground">Margem: {formatarCusto(d.y)}{d.rendimentoUnidade === 'g' ? '/g' : '/un'}</p>
         <Badge className={`mt-1 ${q.bgClass} ${q.textClass} border-0`}>{q.label}</Badge>
       </div>
     );
@@ -643,9 +657,9 @@ export default function Dashboard() {
                                 )}
                               </div>
                               <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                <span>{p.volume} un vendidas</span>
+                                <span>{p.volumeLabel} vendidos</span>
                                 <span className={p.margemContribuicao >= 0 ? 'text-success font-medium' : 'text-destructive font-medium'}>
-                                  {formatarCusto(p.margemContribuicao)}/un
+                                  {formatarCusto(p.margemContribuicao)}/{p.rendimentoUnidade === 'g' ? 'g' : 'un'}
                                 </span>
                               </div>
                             </div>
@@ -673,7 +687,7 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Média Volume</p>
-                    <p className="font-bold text-lg">{mediaVolume.toFixed(0)} un</p>
+                    <p className="font-bold text-lg">{mediaVolume.toFixed(0)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Média Margem</p>
