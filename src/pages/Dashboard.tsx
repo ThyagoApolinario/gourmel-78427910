@@ -123,6 +123,121 @@ const PERIODOS = [
   { value: 'all', label: 'Todo o período' },
 ];
 
+// Breakeven Card with milestone alerts
+interface MilestoneInfo {
+  pct: number;
+  label: string;
+  emoji: string;
+  msg: string;
+}
+
+function BreakevenCard({
+  custoFixoTotal, breakevenReais, faturamentoTotal, progressoPct,
+  milestones, reachedMilestones, nextMilestone,
+}: {
+  custoFixoTotal: number;
+  breakevenReais: number;
+  faturamentoTotal: number;
+  progressoPct: number;
+  milestones: MilestoneInfo[];
+  reachedMilestones: MilestoneInfo[];
+  nextMilestone: MilestoneInfo | undefined;
+}) {
+  const shownRef = useRef<Set<number>>(new Set());
+
+  useEffect(() => {
+    const monthKey = format(new Date(), 'yyyy-MM');
+    const storageKey = `gourmel_milestones_${monthKey}`;
+    const stored = JSON.parse(localStorage.getItem(storageKey) || '[]') as number[];
+    shownRef.current = new Set(stored);
+
+    for (const m of reachedMilestones) {
+      if (!shownRef.current.has(m.pct)) {
+        shownRef.current.add(m.pct);
+        toast.success(`${m.emoji} ${m.label}`, { description: m.msg, duration: 6000 });
+      }
+    }
+
+    localStorage.setItem(storageKey, JSON.stringify([...shownRef.current]));
+  }, [reachedMilestones]);
+
+  return (
+    <Card className="border-accent/20">
+      <CardContent className="p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Target className="h-4 w-4 text-accent" />
+            <span className="text-sm font-semibold">Cobertura de Custos Fixos</span>
+          </div>
+          <a href="/custos-fixos" className="text-xs text-primary hover:underline flex items-center gap-1">
+            <Wallet className="h-3 w-3" /> Gerenciar
+          </a>
+        </div>
+
+        {/* Progress bar with milestone markers */}
+        <div className="relative">
+          <Progress value={progressoPct} className="h-3" />
+          <div className="absolute inset-0 pointer-events-none">
+            {milestones.map(m => (
+              <div
+                key={m.pct}
+                className="absolute top-0 h-full flex items-center"
+                style={{ left: `${m.pct}%`, transform: 'translateX(-50%)' }}
+              >
+                <div className={`w-1 h-4 rounded-full ${progressoPct >= m.pct ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Milestone labels */}
+        <div className="flex justify-between text-[10px] text-muted-foreground px-0.5">
+          <span>0%</span>
+          {milestones.map(m => (
+            <span key={m.pct} className={progressoPct >= m.pct ? 'text-primary font-medium' : ''}>
+              {m.emoji} {m.pct}%
+            </span>
+          ))}
+        </div>
+
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>R$ {faturamentoTotal.toFixed(2).replace('.', ',')} vendidos</span>
+          <span>Meta: R$ {breakevenReais.toFixed(2).replace('.', ',')}</span>
+        </div>
+
+        {/* Status message */}
+        {progressoPct >= 100 ? (
+          <Alert className="border-success/30 bg-success/5 py-2">
+            <AlertDescription className="text-xs text-success font-medium">
+              🎉 Custos fixos cobertos! A partir daqui é lucro real no bolso.
+            </AlertDescription>
+          </Alert>
+        ) : nextMilestone ? (
+          <p className="text-[10px] text-muted-foreground">
+            {nextMilestone.emoji} Próximo marco: <strong>{nextMilestone.pct}%</strong> — {nextMilestone.msg}
+            {' '}(faltam R$ {((breakevenReais * nextMilestone.pct / 100) - faturamentoTotal).toFixed(2).replace('.', ',')})
+          </p>
+        ) : (
+          <p className="text-[10px] text-muted-foreground">
+            Falta {(100 - progressoPct).toFixed(0)}% para cobrir R$ {custoFixoTotal.toFixed(2).replace('.', ',')} de custos fixos mensais
+          </p>
+        )}
+
+        {/* Reached milestones badges */}
+        {reachedMilestones.length > 0 && (
+          <div className="flex gap-1.5 flex-wrap">
+            {reachedMilestones.map(m => (
+              <Badge key={m.pct} variant="outline" className="text-[10px] border-primary/30 text-primary gap-1">
+                {m.emoji} {m.label}
+              </Badge>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const [periodo, setPeriodo] = useState('90');
