@@ -48,6 +48,7 @@ interface Categoria {
 
 export default function Receitas() {
   const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedReceita, setSelectedReceita] = useState<string | null>(null);

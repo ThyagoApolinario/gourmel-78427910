@@ -19,6 +19,7 @@ interface Categoria {
 
 export default function Categorias() {
   const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);

@@ -27,6 +27,7 @@ interface Insumo {
 
 export default function Insumos() {
   const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
