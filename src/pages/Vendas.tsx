@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { PawPrint, Plus, Minus, Trash2, ShoppingBag, CalendarIcon, Filter, TrendingUp, Download, FileSpreadsheet } from 'lucide-react';
+import { PawPrint, Plus, Minus, Trash2, ShoppingBag, CalendarIcon, Filter, TrendingUp, Download, FileSpreadsheet, Scale } from 'lucide-react';
 import { exportVendasXlsx } from '@/lib/export-vendas';
 import { format, subDays, subMonths, startOfDay, endOfDay, eachDayOfInterval, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -57,14 +57,18 @@ export default function Vendas() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('receitas')
-        .select('id, nome')
+        .select('id, nome, rendimento_unidade')
         .eq('user_id', user!.id)
         .order('nome');
       if (error) throw error;
-      return data;
+      return data as { id: string; nome: string; rendimento_unidade: string | null }[];
     },
     enabled: !!user,
   });
+
+  // Check if the selected receita is weight-based
+  const receitaSelecionada = receitas.find(r => r.id === receitaId);
+  const isVendaPorPeso = receitaSelecionada?.rendimento_unidade === 'g';
 
   // Fetch ALL vendas within the date range
   const { data: vendas = [] } = useQuery({
