@@ -9,6 +9,7 @@ import Insumos from "./pages/Insumos";
 import Receitas from "./pages/Receitas";
 import Categorias from "./pages/Categorias";
 import Configuracoes from "./pages/Configuracoes";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ function ProtectedRoutes() {
       <Route path="/receitas" element={<Receitas />} />
       <Route path="/categorias" element={<Categorias />} />
       <Route path="/configuracoes" element={<Configuracoes />} />
+      <Route path="/dashboard" element={<Dashboard />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
