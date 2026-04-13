@@ -18,7 +18,8 @@ import {
   Star, Zap, Puzzle, Dog, BarChart3, AlertTriangle, Clock, TrendingUp,
   ChevronDown, ChevronUp, Target, Wallet,
 } from 'lucide-react';
-import { subDays, parseISO, isAfter } from 'date-fns';
+import { subDays, parseISO, isAfter, format } from 'date-fns';
+import { toast } from 'sonner';
 
 // Types
 interface Receita {
