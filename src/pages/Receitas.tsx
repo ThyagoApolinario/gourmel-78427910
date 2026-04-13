@@ -188,6 +188,9 @@ export default function Receitas() {
   const custoTotal = custoIngredientes + custoEmbalagens;
 
   const receitaSelecionada = receitas.find(r => r.id === selectedReceita);
+  const rendUnidade = receitaSelecionada?.rendimento_unidade || 'un';
+  const isGramas = rendUnidade === 'g';
+  const custoLabel = isGramas ? 'Custo/Grama' : 'Custo/Unidade';
   const custoPorUnidade = receitaSelecionada?.rendimento_quantidade
     ? custoTotal / receitaSelecionada.rendimento_quantidade
     : null;
@@ -340,8 +343,10 @@ export default function Receitas() {
                     <p className="font-bold text-lg text-primary">{formatarCusto(custoTotal)}</p>
                   </div>
                   <div className="text-center p-2 rounded-lg bg-card">
-                    <p className="text-xs text-muted-foreground">Custo/Unidade</p>
-                    <p className="font-bold text-lg">{custoPorUnidade ? formatarCusto(custoPorUnidade) : '—'}</p>
+                    <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                      {isGramas ? <Scale className="h-3 w-3" /> : <Cookie className="h-3 w-3" />} {custoLabel}
+                    </p>
+                    <p className="font-bold text-lg">{custoPorUnidade ? (isGramas ? `R$ ${custoPorUnidade.toFixed(4).replace('.', ',')}` : formatarCusto(custoPorUnidade)) : '—'}</p>
                   </div>
                 </div>
               </CardContent>
