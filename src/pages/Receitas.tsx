@@ -59,6 +59,7 @@ interface Composicao {
   insumo_id: string;
   quantidade: number;
   fator_rendimento: number;
+  unidade_medida: UnidadeMedida;
   insumo?: Insumo;
 }
 
