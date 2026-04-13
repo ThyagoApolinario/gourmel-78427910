@@ -193,6 +193,7 @@ export default function Receitas() {
         insumo_id: addInsumoId,
         quantidade: parseFloat(addQtd),
         fator_rendimento: parseFloat(addFator) || 1,
+        unidade_medida: addUnidade,
       });
       if (error) throw error;
     },
