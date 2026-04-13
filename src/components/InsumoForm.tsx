@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { sugerirUnidade, formatarCusto, calcularCustoUnitario, unidadeLabel } from '@/lib/smart-units';
 import { Lightbulb, Calculator } from 'lucide-react';
+import { HelpTooltip } from '@/components/HelpTooltip';
 
 type UnidadeMedida = 'g' | 'kg' | 'ml' | 'l' | 'un';
 type CategoriaInsumo = 'ingrediente' | 'embalagem';
@@ -139,13 +140,17 @@ export function InsumoForm({ onSubmit, initialData, loading, onCancel }: InsumoF
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="preco">Preço de Compra (R$)</Label>
+              <Label htmlFor="preco" className="flex items-center gap-1.5">Preço de Compra (R$)</Label>
               <Input id="preco" type="number" step="0.01" min="0" value={form.preco_compra} onChange={e => update('preco_compra', e.target.value)} placeholder="0,00" required />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="peso">Peso/Volume da Embalagem</Label>
+              <Label htmlFor="peso" className="flex items-center gap-1.5">
+                Peso/Volume da Embalagem <HelpTooltip field="peso_embalagem" />
+              </Label>
               <Input id="peso" type="number" step="0.01" min="0" value={form.peso_volume_embalagem} onChange={e => update('peso_volume_embalagem', e.target.value)} placeholder="Ex: 1000" required />
+            </div>
+
             </div>
           </div>
 
