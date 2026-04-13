@@ -35,7 +35,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>
             <div className="flex items-center gap-2">
-              <CakeSlice className="h-4 w-4 text-primary" />
+              <img src={logoGourmel} alt="Gourmel" className="h-6 w-6 rounded-full object-cover" />
               {!collapsed && <span className="font-semibold">Gourmel Doce Gestão</span>}
             </div>
           </SidebarGroupLabel>
