@@ -1,4 +1,4 @@
-import { Package, BookOpen, LogOut, Tags, Settings, BarChart3, UserCircle, HelpCircle, Dog } from 'lucide-react';
+import { Package, BookOpen, LogOut, Tags, Settings, BarChart3, UserCircle, HelpCircle, Dog, ShoppingBag } from 'lucide-react';
 import logoGourmel from '@/assets/Logo_Gourmel.jpeg';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
@@ -28,6 +28,7 @@ export function AppSidebar() {
   const menuItems = [
     { title: labels.insumos, url: '/', icon: profile === 'canine' ? Dog : Package },
     { title: labels.receitas, url: '/receitas', icon: BookOpen },
+    { title: labels.vendas, url: '/vendas', icon: ShoppingBag },
     { title: labels.categorias, url: '/categorias', icon: Tags },
     { title: labels.dashboard, url: '/dashboard', icon: BarChart3 },
     { title: labels.configuracoes, url: '/configuracoes', icon: Settings },
