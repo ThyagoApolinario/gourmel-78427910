@@ -8,6 +8,7 @@ import { ProfileProvider } from "@/hooks/useProfile";
 import Auth from "./pages/Auth";
 import Insumos from "./pages/Insumos";
 import Receitas from "./pages/Receitas";
+import Vendas from "./pages/Vendas";
 import Categorias from "./pages/Categorias";
 import Configuracoes from "./pages/Configuracoes";
 import Dashboard from "./pages/Dashboard";
@@ -37,6 +38,7 @@ function ProtectedRoutes() {
     <Routes>
       <Route path="/" element={<Insumos />} />
       <Route path="/receitas" element={<Receitas />} />
+      <Route path="/vendas" element={<Vendas />} />
       <Route path="/categorias" element={<Categorias />} />
       <Route path="/configuracoes" element={<Configuracoes />} />
       <Route path="/dashboard" element={<Dashboard />} />
