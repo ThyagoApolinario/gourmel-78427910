@@ -35,17 +35,17 @@ export default function Configuracoes() {
   const [horasMes, setHorasMes] = useState('160');
 
   const { data: config, isLoading } = useQuery({
-    queryKey: ['configuracoes_financeiras', isAdmin],
+    queryKey: ['configuracoes_financeiras', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('configuracoes_financeiras')
         .select('*')
-        .order('created_at', { ascending: true })
-        .limit(1)
+        .eq('user_id', user!.id)
         .maybeSingle();
       if (error) throw error;
       return data as ConfigFinanceira | null;
     },
+    enabled: !!user,
   });
 
   useEffect(() => {

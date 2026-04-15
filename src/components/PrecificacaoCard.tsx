@@ -46,9 +46,12 @@ export function PrecificacaoCard({
   const { data: config } = useQuery({
     queryKey: ['configuracoes_financeiras'],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
       const { data, error } = await supabase
         .from('configuracoes_financeiras')
         .select('*')
+        .eq('user_id', user.id)
         .maybeSingle();
       if (error) throw error;
       return data as ConfigFinanceira | null;
