@@ -317,50 +317,68 @@ export default function Dashboard() {
     return vendas.filter(v => isAfter(parseISO(v.data_venda), cutoff));
   }, [vendas, periodo]);
 
-  // Calculate analysis per product
+  // Calculate analysis per product — usa LUCRO REAL do snapshot quando disponível
   const { produtos, mediaVolume, mediaMargem } = useMemo(() => {
     const custoMinuto = config ? config.pro_labore / (config.horas_mes * 60) : 0;
 
-    // Aggregate sales per recipe
-    const vendasPorReceita: Record<string, { totalQtd: number; totalReceita: number }> = {};
+    // Aggregate sales per recipe — incluindo lucro líquido real
+    const vendasPorReceita: Record<string, {
+      totalQtd: number;
+      totalReceita: number;
+      totalLiquidoReal: number;
+      qtdComSnapshot: number;
+    }> = {};
     for (const v of vendasFiltradas) {
       if (!vendasPorReceita[v.receita_id]) {
-        vendasPorReceita[v.receita_id] = { totalQtd: 0, totalReceita: 0 };
+        vendasPorReceita[v.receita_id] = { totalQtd: 0, totalReceita: 0, totalLiquidoReal: 0, qtdComSnapshot: 0 };
       }
-      vendasPorReceita[v.receita_id].totalQtd += v.quantidade;
-      vendasPorReceita[v.receita_id].totalReceita += v.quantidade * v.preco_venda;
+      const acc = vendasPorReceita[v.receita_id];
+      acc.totalQtd += v.quantidade;
+      acc.totalReceita += v.quantidade * v.preco_venda;
+      if (v.valor_liquido_real != null) {
+        acc.totalLiquidoReal += Number(v.valor_liquido_real);
+        acc.qtdComSnapshot += v.quantidade;
+      }
     }
 
-    // Only analyze recipes that have sales
-    const receitasComVendas = receitas.filter(r => vendasPorReceita[r.id]);
+    const receitasComVendas = receitas.filter((r) => vendasPorReceita[r.id]);
 
-    const produtos: ProdutoAnalise[] = receitasComVendas.map(r => {
+    const produtos: ProdutoAnalise[] = receitasComVendas.map((r) => {
       const vData = vendasPorReceita[r.id];
       const volume = vData.totalQtd;
       const unidade = r.rendimento_unidade || 'un';
       const isPeso = unidade === 'g';
       const precoMedioVenda = vData.totalReceita / vData.totalQtd;
 
-      // Volume label adapts to unit
       const volumeLabel = isPeso
-        ? (volume >= 1000 ? `${(volume / 1000).toFixed(1)} kg` : `${volume.toFixed(0)} g`)
+        ? volume >= 1000
+          ? `${(volume / 1000).toFixed(1)} kg`
+          : `${volume.toFixed(0)} g`
         : `${volume} un`;
 
-      // Calculate cost per unit
-      const comps = composicoes.filter(c => c.receita_id === r.id);
+      // Calcular custo teórico (para fallback)
+      const comps = composicoes.filter((c) => c.receita_id === r.id);
       let custoInsumos = 0;
       for (const c of comps) {
         const custoUn = c.insumo?.custo_unitario ?? 0;
         const fator = c.fator_rendimento || 1;
         custoInsumos += (c.quantidade * custoUn) / fator;
       }
-
       const custoMaoDeObra = r.tempo_producao_minutos ? r.tempo_producao_minutos * custoMinuto : 0;
       const custoTotalReceita = custoInsumos + custoMaoDeObra;
-      const custoPorUnidade = r.rendimento_quantidade ? custoTotalReceita / r.rendimento_quantidade : custoTotalReceita;
+      const custoPorUnidade = r.rendimento_quantidade
+        ? custoTotalReceita / r.rendimento_quantidade
+        : custoTotalReceita;
 
-      // Margem de contribuição em R$ por unidade/grama
-      const margemContribuicao = precoMedioVenda - custoPorUnidade;
+      // Margem REAL: usa lucro líquido do snapshot quando vendas têm método registrado.
+      // Fallback para cálculo teórico quando não há snapshot.
+      let margemContribuicao: number;
+      if (vData.qtdComSnapshot > 0) {
+        // Lucro real médio por unidade (já inclui taxa do método e custo de insumos do momento)
+        margemContribuicao = vData.totalLiquidoReal / vData.qtdComSnapshot;
+      } else {
+        margemContribuicao = precoMedioVenda - custoPorUnidade;
+      }
 
       return {
         id: r.id,
@@ -376,11 +394,13 @@ export default function Dashboard() {
       };
     });
 
-    // Calculate averages
-    const mediaVolume = produtos.length > 0 ? produtos.reduce((s, p) => s + p.volume, 0) / produtos.length : 0;
-    const mediaMargem = produtos.length > 0 ? produtos.reduce((s, p) => s + p.margemContribuicao, 0) / produtos.length : 0;
+    const mediaVolume =
+      produtos.length > 0 ? produtos.reduce((s, p) => s + p.volume, 0) / produtos.length : 0;
+    const mediaMargem =
+      produtos.length > 0
+        ? produtos.reduce((s, p) => s + p.margemContribuicao, 0) / produtos.length
+        : 0;
 
-    // Classify
     for (const p of produtos) {
       if (p.volume >= mediaVolume && p.margemContribuicao >= mediaMargem) p.quadrante = 'estrela';
       else if (p.volume >= mediaVolume && p.margemContribuicao < mediaMargem) p.quadrante = 'cavalo';
