@@ -340,8 +340,17 @@ export default function Dashboard() {
   }, [vendas, periodo]);
 
   // Calculate analysis per product — usa LUCRO REAL do snapshot quando disponível
+  // Para vendas de KITS: distribui popularidade proporcionalmente nos sub-itens (receitas) do kit
   const { produtos, mediaVolume, mediaMargem } = useMemo(() => {
     const custoMinuto = config ? config.pro_labore / (config.horas_mes * 60) : 0;
+
+    // Indexar itens dos kits por kit_id
+    const itensPorKit = new Map<string, KitItem[]>();
+    for (const ki of kitItens) {
+      if (!ki.receita_id) continue;
+      if (!itensPorKit.has(ki.kit_id)) itensPorKit.set(ki.kit_id, []);
+      itensPorKit.get(ki.kit_id)!.push(ki);
+    }
 
     // Aggregate sales per recipe — incluindo lucro líquido real
     const vendasPorReceita: Record<string, {
@@ -350,16 +359,47 @@ export default function Dashboard() {
       totalLiquidoReal: number;
       qtdComSnapshot: number;
     }> = {};
-    for (const v of vendasFiltradas) {
-      if (!vendasPorReceita[v.receita_id]) {
-        vendasPorReceita[v.receita_id] = { totalQtd: 0, totalReceita: 0, totalLiquidoReal: 0, qtdComSnapshot: 0 };
+
+    const incrementar = (
+      receitaId: string,
+      qtd: number,
+      receita: number,
+      liquido: number | null,
+    ) => {
+      if (!vendasPorReceita[receitaId]) {
+        vendasPorReceita[receitaId] = { totalQtd: 0, totalReceita: 0, totalLiquidoReal: 0, qtdComSnapshot: 0 };
       }
-      const acc = vendasPorReceita[v.receita_id];
-      acc.totalQtd += v.quantidade;
-      acc.totalReceita += v.quantidade * v.preco_venda;
-      if (v.valor_liquido_real != null) {
-        acc.totalLiquidoReal += Number(v.valor_liquido_real);
-        acc.qtdComSnapshot += v.quantidade;
+      const acc = vendasPorReceita[receitaId];
+      acc.totalQtd += qtd;
+      acc.totalReceita += receita;
+      if (liquido != null) {
+        acc.totalLiquidoReal += liquido;
+        acc.qtdComSnapshot += qtd;
+      }
+    };
+
+    for (const v of vendasFiltradas) {
+      if (v.kit_id && itensPorKit.has(v.kit_id)) {
+        // Distribuir nos sub-itens (receitas componentes)
+        const itens = itensPorKit.get(v.kit_id)!;
+        const totalQtdItens = itens.reduce((s, i) => s + Number(i.quantidade), 0);
+        if (totalQtdItens > 0) {
+          for (const it of itens) {
+            const peso = Number(it.quantidade) / totalQtdItens;
+            const qtdAtribuida = v.quantidade * Number(it.quantidade);
+            const receitaAtribuida = v.quantidade * v.preco_venda * peso;
+            const liquidoAtribuido =
+              v.valor_liquido_real != null ? Number(v.valor_liquido_real) * peso : null;
+            incrementar(it.receita_id!, qtdAtribuida, receitaAtribuida, liquidoAtribuido);
+          }
+        }
+      } else if (v.receita_id) {
+        incrementar(
+          v.receita_id,
+          v.quantidade,
+          v.quantidade * v.preco_venda,
+          v.valor_liquido_real != null ? Number(v.valor_liquido_real) : null,
+        );
       }
     }
 
