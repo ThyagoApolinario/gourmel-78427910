@@ -262,7 +262,43 @@ export default function Receitas() {
     onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
   });
 
-  // Cost calculations with unit conversion
+  // Update mes_producao mutation
+  const updateMesProducaoMutation = useMutation({
+    mutationFn: async ({ id, mes }: { id: string; mes: string }) => {
+      const { error } = await supabase.from('receitas').update({ mes_producao: mes }).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['receitas'] });
+      toast({ title: 'Mês de produção atualizado!' });
+    },
+    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+  });
+
+  // Check if recipe's month is locked (past month with sales)
+  const { data: vendasReceita = [] } = useQuery({
+    queryKey: ['vendas_receita_lock', selectedReceita],
+    enabled: !!selectedReceita,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('vendas')
+        .select('id')
+        .eq('receita_id', selectedReceita!)
+        .limit(1);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const mesProducaoLocked = useMemo(() => {
+    if (!receitaSelecionada?.mes_producao) return false;
+    const mesProd = new Date(receitaSelecionada.mes_producao + 'T00:00:00');
+    const now = new Date();
+    const inicioMesAtual = new Date(now.getFullYear(), now.getMonth(), 1);
+    // Locked if month is in the past AND has sales
+    return mesProd < inicioMesAtual && vendasReceita.length > 0;
+  }, [receitaSelecionada, vendasReceita]);
+
   const calcItemCost = (c: Composicao) => {
     const custoUn = c.insumo?.custo_unitario ?? 0; // cost per insumo unit (e.g. per g, per ml)
     const insumoUnit = (c.insumo?.unidade_medida ?? 'g') as UnidadeMedida;
@@ -439,7 +475,30 @@ export default function Receitas() {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="sm" onClick={() => setSelectedReceita(null)}>← Voltar</Button>
-              <h2 className="text-xl font-bold">{receitaSelecionada.nome}</h2>
+              <h2 className="text-xl font-bold flex-1">{receitaSelecionada.nome}</h2>
+            </div>
+
+            {/* Mês de produção editável */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <Label className="flex items-center gap-1.5 text-sm">
+                <CalendarRange className="h-3.5 w-3.5" /> Mês de Produção:
+              </Label>
+              <Input
+                type="month"
+                className="w-[180px]"
+                value={receitaSelecionada.mes_producao ? receitaSelecionada.mes_producao.slice(0, 7) : ''}
+                disabled={mesProducaoLocked}
+                onChange={e => {
+                  if (e.target.value) {
+                    updateMesProducaoMutation.mutate({ id: receitaSelecionada.id, mes: e.target.value + '-01' });
+                  }
+                }}
+              />
+              {mesProducaoLocked && (
+                <Badge variant="outline" className="text-[10px] text-muted-foreground">
+                  🔒 Mês fechado (vendas registradas)
+                </Badge>
+              )}
             </div>
 
             {/* Card de Resumo de Custo */}
