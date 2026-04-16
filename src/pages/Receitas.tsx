@@ -368,6 +368,10 @@ export default function Receitas() {
                     <Label className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Tempo de Produção (min) <HelpTooltip field="tempo_producao" /></Label>
                     <Input type="number" min="0" value={formTempoMin} onChange={e => setFormTempoMin(e.target.value)} placeholder="Ex: 120" />
                   </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-1.5"><CalendarRange className="h-3.5 w-3.5" /> Mês de Produção</Label>
+                    <Input type="month" value={formMesProducao.slice(0, 7)} onChange={e => setFormMesProducao(e.target.value + '-01')} />
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <Button type="submit" disabled={createReceitaMutation.isPending} className="flex-1">Criar</Button>
