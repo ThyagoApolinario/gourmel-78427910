@@ -131,6 +131,18 @@ export default function PontoEquilibrio() {
   const impostos = config?.impostos ?? 5;
   const custoMinuto = config ? config.pro_labore / (config.horas_mes * 60) : 0;
 
+  // Receitas relevant to this month: assigned to this month OR have sales in this month
+  const receitaIdsComVendas = useMemo(() => new Set(vendas.map(v => v.receita_id)), [vendas]);
+  const receitas = useMemo(() => {
+    return allReceitas.filter(r => {
+      // Has sales in the selected month
+      if (receitaIdsComVendas.has(r.id)) return true;
+      // Or is assigned to produce in this month
+      if (r.mes_producao && r.mes_producao >= mesStart && r.mes_producao <= mesEnd) return true;
+      return false;
+    });
+  }, [allReceitas, receitaIdsComVendas, mesStart, mesEnd]);
+
   // Per-recipe breakdown
   const receitaBreakdown = useMemo(() => {
     return receitas.map(r => {
