@@ -216,6 +216,7 @@ export type Database = {
           descricao: string | null
           id: string
           margem_desejada: number | null
+          mes_producao: string | null
           nome: string
           rendimento_quantidade: number | null
           rendimento_unidade: string | null
@@ -229,6 +230,7 @@ export type Database = {
           descricao?: string | null
           id?: string
           margem_desejada?: number | null
+          mes_producao?: string | null
           nome: string
           rendimento_quantidade?: number | null
           rendimento_unidade?: string | null
@@ -242,6 +244,7 @@ export type Database = {
           descricao?: string | null
           id?: string
           margem_desejada?: number | null
+          mes_producao?: string | null
           nome?: string
           rendimento_quantidade?: number | null
           rendimento_unidade?: string | null
