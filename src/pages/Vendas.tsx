@@ -14,7 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import {
   PawPrint, Plus, Minus, Trash2, ShoppingBag, CalendarIcon, Filter, Download,
-  FileSpreadsheet, Scale, CreditCard, Star, AlertTriangle,
+  FileSpreadsheet, Scale, CreditCard, Star, AlertTriangle, Gift, BookOpen,
 } from 'lucide-react';
 import { exportVendasXlsx } from '@/lib/export-vendas';
 import { format, subDays, subMonths, eachDayOfInterval } from 'date-fns';
@@ -24,6 +24,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { calcCustoInsumosPorUnidade } from '@/lib/calc-custo-receita';
+import { calcularKit, type FinanceConfig } from '@/lib/calc-kit';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const CANAIS = ['Instagram', 'WhatsApp', 'Feira Pet', 'Direto'];
@@ -45,7 +46,9 @@ export default function Vendas() {
   const queryClient = useQueryClient();
 
   // Form state
+  const [tipoItem, setTipoItem] = useState<'receita' | 'kit'>('receita');
   const [receitaId, setReceitaId] = useState('');
+  const [kitId, setKitId] = useState('');
   const [quantidade, setQuantidade] = useState(1);
   const [valorUnitario, setValorUnitario] = useState('');
   const [canal, setCanal] = useState('Direto');
