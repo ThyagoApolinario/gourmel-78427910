@@ -100,7 +100,6 @@ export type Database = {
           impostos: number
           margem_desejada: number
           pro_labore: number
-          taxa_cartao: number
           updated_at: string
           user_id: string
         }
@@ -111,7 +110,6 @@ export type Database = {
           impostos?: number
           margem_desejada?: number
           pro_labore?: number
-          taxa_cartao?: number
           updated_at?: string
           user_id: string
         }
@@ -122,7 +120,6 @@ export type Database = {
           impostos?: number
           margem_desejada?: number
           pro_labore?: number
-          taxa_cartao?: number
           updated_at?: string
           user_id?: string
         }
@@ -209,6 +206,42 @@ export type Database = {
         }
         Relationships: []
       }
+      metodos_pagamento: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          id: string
+          is_padrao_precificacao: boolean
+          nome: string
+          ordem: number
+          taxa_percentual: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          is_padrao_precificacao?: boolean
+          nome: string
+          ordem?: number
+          taxa_percentual?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          is_padrao_precificacao?: boolean
+          nome?: string
+          ordem?: number
+          taxa_percentual?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       receitas: {
         Row: {
           categoria_id: string | null
@@ -287,37 +320,59 @@ export type Database = {
         Row: {
           canal_venda: string
           created_at: string
+          custo_insumos_snapshot: number | null
           data_venda: string
           id: string
+          metodo_pagamento_id: string | null
+          metodo_pagamento_nome: string | null
           preco_venda: number
           quantidade: number
           receita_id: string
+          taxa_aplicada: number | null
           updated_at: string
           user_id: string
+          valor_liquido_real: number | null
         }
         Insert: {
           canal_venda?: string
           created_at?: string
+          custo_insumos_snapshot?: number | null
           data_venda?: string
           id?: string
+          metodo_pagamento_id?: string | null
+          metodo_pagamento_nome?: string | null
           preco_venda: number
           quantidade?: number
           receita_id: string
+          taxa_aplicada?: number | null
           updated_at?: string
           user_id: string
+          valor_liquido_real?: number | null
         }
         Update: {
           canal_venda?: string
           created_at?: string
+          custo_insumos_snapshot?: number | null
           data_venda?: string
           id?: string
+          metodo_pagamento_id?: string | null
+          metodo_pagamento_nome?: string | null
           preco_venda?: number
           quantidade?: number
           receita_id?: string
+          taxa_aplicada?: number | null
           updated_at?: string
           user_id?: string
+          valor_liquido_real?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "vendas_metodo_pagamento_id_fkey"
+            columns: ["metodo_pagamento_id"]
+            isOneToOne: false
+            referencedRelation: "metodos_pagamento"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vendas_receita_id_fkey"
             columns: ["receita_id"]
