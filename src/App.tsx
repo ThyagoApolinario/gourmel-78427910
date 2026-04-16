@@ -17,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import Perfil from "./pages/Perfil";
 import Ajuda from "./pages/Ajuda";
 import PontoEquilibrio from "./pages/PontoEquilibrio";
+import RelatorioMetodos from "./pages/RelatorioMetodos";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import { useSessionGuard } from "./hooks/useSessionGuard";
