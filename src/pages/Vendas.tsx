@@ -26,6 +26,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { calcCustoInsumosPorUnidade } from '@/lib/calc-custo-receita';
 import { calcularKit, type FinanceConfig } from '@/lib/calc-kit';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { KitPreviewDialog } from '@/components/KitPreviewDialog';
 
 const CANAIS = ['Instagram', 'WhatsApp', 'Feira Pet', 'Direto'];
 
@@ -54,6 +55,7 @@ export default function Vendas() {
   const [canal, setCanal] = useState('Direto');
   const [dataVenda, setDataVenda] = useState<Date>(new Date());
   const [metodoPagamentoId, setMetodoPagamentoId] = useState('');
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   // Filter state
   const [periodo, setPeriodo] = useState<PeriodoFiltro>('7d');
@@ -270,6 +272,7 @@ export default function Vendas() {
       setValorUnitario('');
       setCanal('Direto');
       setDataVenda(new Date());
+      setPreviewOpen(false);
     },
     onError: (err: any) => {
       toast({ title: 'Erro ao registrar venda', description: err.message, variant: 'destructive' });
@@ -531,13 +534,35 @@ export default function Vendas() {
               className="w-full gap-2 mt-2"
               size="lg"
               disabled={(tipoItem === 'receita' ? !receitaId : !kitId) || !valorUnitario || !metodoPagamentoId || createMutation.isPending}
-              onClick={() => createMutation.mutate()}
+              onClick={() => {
+                if (tipoItem === 'kit') {
+                  setPreviewOpen(true);
+                } else {
+                  createMutation.mutate();
+                }
+              }}
             >
-              <PawPrint className="h-5 w-5" />
-              Confirmar Venda
+              {tipoItem === 'kit' ? <Gift className="h-5 w-5" /> : <PawPrint className="h-5 w-5" />}
+              {tipoItem === 'kit' ? 'Pré-visualizar Kit' : 'Confirmar Venda'}
             </Button>
           </CardContent>
         </Card>
+
+        {/* Kit preview modal */}
+        {tipoItem === 'kit' && kitId && (
+          <KitPreviewDialog
+            open={previewOpen}
+            onOpenChange={setPreviewOpen}
+            kitId={kitId}
+            quantidade={quantidade}
+            precoUnitario={parseFloat((valorUnitario || '0').replace(',', '.')) || 0}
+            taxaPct={metodos.find((m) => m.id === metodoPagamentoId)?.taxa_percentual ?? 0}
+            metodoNome={metodos.find((m) => m.id === metodoPagamentoId)?.nome ?? '—'}
+            config={configFin ?? null}
+            onConfirm={() => createMutation.mutate()}
+            isConfirming={createMutation.isPending}
+          />
+        )}
 
         {/* Filters */}
         <Card>
