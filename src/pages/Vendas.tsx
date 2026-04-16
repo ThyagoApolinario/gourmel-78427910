@@ -134,7 +134,15 @@ export default function Vendas() {
   }, [metodos, metodoPagamentoId]);
 
   const receitaSelecionada = receitas.find((r) => r.id === receitaId);
-  const isVendaPorPeso = receitaSelecionada?.rendimento_unidade === 'g';
+  const kitSelecionado = kits.find((k) => k.id === kitId);
+  const isVendaPorPeso = tipoItem === 'receita' && receitaSelecionada?.rendimento_unidade === 'g';
+
+  // Auto-fill preço quando seleciona um kit que tem preço definido
+  useEffect(() => {
+    if (tipoItem === 'kit' && kitSelecionado?.preco_final_manual != null) {
+      setValorUnitario(String(kitSelecionado.preco_final_manual).replace('.', ','));
+    }
+  }, [kitId, tipoItem, kitSelecionado]);
 
   // Vendas no período
   const { data: vendas = [] } = useQuery({
@@ -147,7 +155,7 @@ export default function Vendas() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('vendas')
-        .select('*, receitas(nome)')
+        .select('*, receitas(nome), kits(nome)')
         .eq('user_id', user!.id)
         .gte('data_venda', format(dateRange.start, 'yyyy-MM-dd'))
         .lte('data_venda', format(dateRange.end, 'yyyy-MM-dd'))
@@ -193,23 +201,48 @@ export default function Vendas() {
   // Há vendas antigas sem método?
   const vendasSemMetodo = vendas.filter((v: any) => !v.metodo_pagamento_id).length;
 
-  // Create venda — com snapshot
+  // Create venda — com snapshot (suporta receita ou kit)
   const createMutation = useMutation({
     mutationFn: async () => {
       const valor = parseFloat(valorUnitario.replace(',', '.'));
-      if (!receitaId || isNaN(valor) || valor <= 0) throw new Error('Preencha todos os campos');
+      if (isNaN(valor) || valor <= 0) throw new Error('Preencha o valor');
+      if (tipoItem === 'receita' && !receitaId) throw new Error('Selecione um produto');
+      if (tipoItem === 'kit' && !kitId) throw new Error('Selecione um kit');
       if (!metodoPagamentoId) throw new Error('Selecione o método de pagamento');
 
       const metodo = metodos.find((m) => m.id === metodoPagamentoId);
       if (!metodo) throw new Error('Método de pagamento inválido');
 
       // Snapshot do custo de insumos no momento da venda
-      const custoUnitarioSnapshot = await calcCustoInsumosPorUnidade(receitaId);
-      const custoTotalSnapshot = custoUnitarioSnapshot * quantidade;
+      let custoTotalSnapshot = 0;
+      if (tipoItem === 'receita') {
+        const custoUnit = await calcCustoInsumosPorUnidade(receitaId);
+        custoTotalSnapshot = custoUnit * quantidade;
+      } else {
+        // Kit: calcula custo total via composição atual
+        if (!configFin) throw new Error('Configurações financeiras não encontradas');
+        const { data: kitData } = await supabase.from('kits').select('*').eq('id', kitId).maybeSingle();
+        const { data: kitItens } = await supabase.from('kit_itens').select('*').eq('kit_id', kitId);
+        if (!kitData || !kitItens) throw new Error('Kit não encontrado');
+        const breakdown = await calcularKit(
+          kitItens.map((i: any) => ({
+            tipo_item: i.tipo_item,
+            receita_id: i.receita_id,
+            insumo_id: i.insumo_id,
+            quantidade: Number(i.quantidade),
+          })),
+          Number(kitData.tempo_montagem_minutos) || 0,
+          kitData.zerar_mao_obra,
+          configFin,
+          metodo.taxa_percentual,
+        );
+        custoTotalSnapshot = breakdown.custoTotal * quantidade;
+      }
 
       const { error } = await supabase.from('vendas').insert({
         user_id: user!.id,
-        receita_id: receitaId,
+        receita_id: tipoItem === 'receita' ? receitaId : null,
+        kit_id: tipoItem === 'kit' ? kitId : null,
         quantidade,
         preco_venda: valor,
         data_venda: format(dataVenda, 'yyyy-MM-dd'),
@@ -225,18 +258,18 @@ export default function Vendas() {
       queryClient.invalidateQueries({ queryKey: ['vendas-filtradas'] });
       queryClient.invalidateQueries({ queryKey: ['vendas'] });
       toast({
-        title: 'Venda registrada! 🐾',
+        title: tipoItem === 'kit' ? 'Kit vendido! 🎁' : 'Venda registrada! 🐾',
         description:
           profile === 'canine'
             ? 'Petisco vendido com sucesso! Mais saúde para os pets.'
             : 'Venda registrada com sucesso!',
       });
       setReceitaId('');
+      setKitId('');
       setQuantidade(1);
       setValorUnitario('');
       setCanal('Direto');
       setDataVenda(new Date());
-      // mantém método selecionado para registro rápido
     },
     onError: (err: any) => {
       toast({ title: 'Erro ao registrar venda', description: err.message, variant: 'destructive' });
