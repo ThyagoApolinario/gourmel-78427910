@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,7 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { formatarCusto } from '@/lib/smart-units';
-import { Plus, Trash2, BookOpen, Calculator, Package, CakeSlice, Clock, Scale, Cookie, AlertTriangle, Check, Pencil, X, Search } from 'lucide-react';
+import { Plus, Trash2, BookOpen, Calculator, Package, CakeSlice, Clock, Scale, Cookie, AlertTriangle, Check, Pencil, X, Search, CalendarRange } from 'lucide-react';
 import { PrecificacaoCard } from '@/components/PrecificacaoCard';
 import { HelpTooltip } from '@/components/HelpTooltip';
 
@@ -72,6 +72,7 @@ interface Receita {
   rendimento_unidade: string | null;
   tempo_producao_minutos: number | null;
   margem_desejada: number | null;
+  mes_producao: string | null;
 }
 
 interface Categoria {
@@ -92,6 +93,11 @@ export default function Receitas() {
   const [formRendQtd, setFormRendQtd] = useState('');
   const [formRendUn, setFormRendUn] = useState('un');
   const [formTempoMin, setFormTempoMin] = useState('');
+  const currentMonthDefault = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+  }, []);
+  const [formMesProducao, setFormMesProducao] = useState(currentMonthDefault);
 
   // Composição form
   const [addInsumoId, setAddInsumoId] = useState('');
