@@ -34,6 +34,7 @@ export default function Categorias() {
       if (error) throw error;
       return data as Categoria[];
     },
+    enabled: !!user,
   });
 
   const saveMutation = useMutation({
