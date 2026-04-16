@@ -43,12 +43,15 @@ interface Venda {
   quantidade: number;
   preco_venda: number;
   data_venda: string;
+  valor_liquido_real: number | null;
+  custo_insumos_snapshot: number | null;
+  taxa_aplicada: number | null;
+  metodo_pagamento_nome: string | null;
 }
 
 interface ConfigFinanceira {
   pro_labore: number;
   horas_mes: number;
-  taxa_cartao: number;
   impostos: number;
 }
 
@@ -273,7 +276,10 @@ export default function Dashboard() {
   const { data: vendas = [] } = useQuery({
     queryKey: ['vendas', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from('vendas').select('receita_id, quantidade, preco_venda, data_venda').eq('user_id', user!.id);
+      const { data, error } = await supabase
+        .from('vendas')
+        .select('receita_id, quantidade, preco_venda, data_venda, valor_liquido_real, custo_insumos_snapshot, taxa_aplicada, metodo_pagamento_nome')
+        .eq('user_id', user!.id);
       if (error) throw error;
       return (data || []) as Venda[];
     },
