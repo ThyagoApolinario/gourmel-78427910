@@ -20,6 +20,7 @@ const CANINE_LABELS = {
   dashboard: 'Painel de Vendas',
   vendas: 'Vendas Pet',
   relatorio: 'Relatório Mensal',
+  relatorioMetodos: 'Relatório por Método',
   custosFixos: 'Custos Fixos',
   pontoEquilibrio: 'Ponto de Equilíbrio',
   ajuda: 'Guia de Nutrição e Lucro',
