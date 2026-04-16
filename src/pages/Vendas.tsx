@@ -530,7 +530,7 @@ export default function Vendas() {
             <Button
               className="w-full gap-2 mt-2"
               size="lg"
-              disabled={!receitaId || !valorUnitario || !metodoPagamentoId || createMutation.isPending}
+              disabled={(tipoItem === 'receita' ? !receitaId : !kitId) || !valorUnitario || !metodoPagamentoId || createMutation.isPending}
               onClick={() => createMutation.mutate()}
             >
               <PawPrint className="h-5 w-5" />
@@ -698,7 +698,7 @@ export default function Vendas() {
                     const rows = vendasFiltradas
                       .map(
                         (v: any) =>
-                          `${v.receitas?.nome || 'Removido'};${v.quantidade};${Number(v.preco_venda)
+                          `${v.kits?.nome || v.receitas?.nome || 'Removido'};${v.quantidade};${Number(v.preco_venda)
                             .toFixed(2)
                             .replace('.', ',')};${(v.preco_venda * v.quantidade)
                             .toFixed(2)
@@ -742,7 +742,7 @@ export default function Vendas() {
                           : `${format(customInicio, 'dd/MM')} a ${format(customFim, 'dd/MM')}`;
                     await exportVendasXlsx(
                       vendasFiltradas.map((v: any) => ({
-                        produto: v.receitas?.nome || 'Removido',
+                        produto: v.kits?.nome || v.receitas?.nome || 'Removido',
                         quantidade: v.quantidade,
                         valorUnitario: Number(v.preco_venda),
                         total: v.preco_venda * v.quantidade,
@@ -773,8 +773,9 @@ export default function Vendas() {
                 <Card key={v.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="py-3 px-4 flex items-center justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">
-                        {v.receitas?.nome || 'Produto removido'}
+                      <div className="font-medium text-sm truncate flex items-center gap-1.5">
+                        {v.kit_id && <Gift className="h-3.5 w-3.5 text-accent shrink-0" />}
+                        {v.kits?.nome || v.receitas?.nome || 'Produto removido'}
                       </div>
                       <div className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5 flex-wrap">
                         <span>
