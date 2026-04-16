@@ -45,6 +45,7 @@ const CLASSIC_LABELS = {
   dashboard: 'Dashboard',
   vendas: 'Vendas',
   relatorio: 'Relatório Mensal',
+  relatorioMetodos: 'Relatório por Método',
   custosFixos: 'Custos Fixos',
   pontoEquilibrio: 'Ponto de Equilíbrio',
   ajuda: 'Central de Ajuda',
