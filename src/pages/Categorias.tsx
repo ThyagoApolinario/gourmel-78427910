@@ -28,9 +28,9 @@ export default function Categorias() {
   const [descricao, setDescricao] = useState('');
 
   const { data: categorias = [], isLoading } = useQuery({
-    queryKey: ['categorias'],
+    queryKey: ['categorias', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from('categorias_receita').select('*').order('nome');
+      const { data, error } = await supabase.from('categorias_receita').select('*').eq('user_id', user!.id).order('nome');
       if (error) throw error;
       return data as Categoria[];
     },
