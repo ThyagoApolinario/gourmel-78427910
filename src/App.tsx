@@ -18,6 +18,7 @@ import Perfil from "./pages/Perfil";
 import Ajuda from "./pages/Ajuda";
 import PontoEquilibrio from "./pages/PontoEquilibrio";
 import RelatorioMetodos from "./pages/RelatorioMetodos";
+import Kits from "./pages/Kits";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import { useSessionGuard } from "./hooks/useSessionGuard";
@@ -42,6 +43,7 @@ function ProtectedRoutes() {
     <Routes>
       <Route path="/" element={<Insumos />} />
       <Route path="/receitas" element={<Receitas />} />
+      <Route path="/kits" element={<Kits />} />
       <Route path="/vendas" element={<Vendas />} />
       <Route path="/relatorio" element={<RelatorioMensal />} />
       <Route path="/custos-fixos" element={<CustosFixos />} />
