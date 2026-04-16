@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,7 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { formatarCusto } from '@/lib/smart-units';
-import { Plus, Trash2, BookOpen, Calculator, Package, CakeSlice, Clock, Scale, Cookie, AlertTriangle, Check, Pencil, X, Search } from 'lucide-react';
+import { Plus, Trash2, BookOpen, Calculator, Package, CakeSlice, Clock, Scale, Cookie, AlertTriangle, Check, Pencil, X, Search, CalendarRange } from 'lucide-react';
 import { PrecificacaoCard } from '@/components/PrecificacaoCard';
 import { HelpTooltip } from '@/components/HelpTooltip';
 
@@ -72,6 +72,7 @@ interface Receita {
   rendimento_unidade: string | null;
   tempo_producao_minutos: number | null;
   margem_desejada: number | null;
+  mes_producao: string | null;
 }
 
 interface Categoria {
@@ -92,6 +93,11 @@ export default function Receitas() {
   const [formRendQtd, setFormRendQtd] = useState('');
   const [formRendUn, setFormRendUn] = useState('un');
   const [formTempoMin, setFormTempoMin] = useState('');
+  const currentMonthDefault = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+  }, []);
+  const [formMesProducao, setFormMesProducao] = useState(currentMonthDefault);
 
   // Composição form
   const [addInsumoId, setAddInsumoId] = useState('');
@@ -180,6 +186,7 @@ export default function Receitas() {
         rendimento_quantidade: formRendQtd ? parseFloat(formRendQtd) : null,
         rendimento_unidade: formRendUn || 'un',
         tempo_producao_minutos: formTempoMin ? parseFloat(formTempoMin) : null,
+        mes_producao: formMesProducao,
       });
       if (error) throw error;
     },
@@ -360,6 +367,10 @@ export default function Receitas() {
                   <div className="space-y-2">
                     <Label className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Tempo de Produção (min) <HelpTooltip field="tempo_producao" /></Label>
                     <Input type="number" min="0" value={formTempoMin} onChange={e => setFormTempoMin(e.target.value)} placeholder="Ex: 120" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-1.5"><CalendarRange className="h-3.5 w-3.5" /> Mês de Produção</Label>
+                    <Input type="month" value={formMesProducao.slice(0, 7)} onChange={e => setFormMesProducao(e.target.value + '-01')} />
                   </div>
                 </div>
                 <div className="flex gap-2">

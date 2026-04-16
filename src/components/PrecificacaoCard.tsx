@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +6,7 @@ import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { TrendingUp, AlertTriangle, Target, DollarSign, Save, Scale, Cookie } from 'lucide-react';
+import { TrendingUp, AlertTriangle, DollarSign, Save, Scale, Cookie } from 'lucide-react';
 import { formatarCusto } from '@/lib/smart-units';
 import { useToast } from '@/hooks/use-toast';
 
@@ -58,7 +58,6 @@ export function PrecificacaoCard({
     },
   });
 
-  // Per-recipe margin takes priority > saved per-recipe > global config > default 30
   const defaultMargem = margemSalva ?? config?.margem_desejada ?? 30;
   const [margemSlider, setMargemSlider] = useState<number | null>(null);
   const margem = margemSlider ?? defaultMargem;
@@ -102,10 +101,6 @@ export function PrecificacaoCard({
   const lucroLiquidoPorUnidade = precoSugeridoPorUnidade && rendimentoQuantidade
     ? precoSugeridoPorUnidade - (custoVariavelTotal / rendimentoQuantidade)
       - (precoSugeridoPorUnidade * (taxaCartao + impostos) / 100)
-    : null;
-
-  const pontoEquilibrio = precoSugeridoPorUnidade && precoSugeridoPorUnidade > 0
-    ? custoVariavelTotal / precoSugeridoPorUnidade
     : null;
 
   if (!config) {
@@ -204,11 +199,11 @@ export function PrecificacaoCard({
           </Alert>
         )}
 
-        {/* Price result */}
+        {/* Price result — without break-even (moved to /ponto-equilibrio) */}
         {!isMargemCritica && precoSugerido !== null && (
           <Card className="border-success/30 bg-success/5">
             <CardContent className="p-3 sm:p-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div className="text-center">
                   <p className="text-[10px] sm:text-xs text-muted-foreground flex items-center justify-center gap-1">
                     <DollarSign className="h-3 w-3" /> Preço Total
@@ -221,14 +216,6 @@ export function PrecificacaoCard({
                   </p>
                   <p className="font-bold text-base sm:text-lg">
                     {precoSugeridoPorUnidade ? (isGramas ? `R$ ${precoSugeridoPorUnidade.toFixed(4).replace('.', ',')}` : formatarCusto(precoSugeridoPorUnidade)) : '—'}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-[10px] sm:text-xs text-muted-foreground flex items-center justify-center gap-1">
-                    <Target className="h-3 w-3" /> Ponto Equilíbrio
-                  </p>
-                  <p className="font-bold text-base sm:text-lg">
-                    {pontoEquilibrio ? `${pontoEquilibrio.toFixed(1)} ${unAbrev}` : '—'}
                   </p>
                 </div>
                 <div className="text-center">
