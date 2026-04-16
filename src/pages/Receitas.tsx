@@ -114,30 +114,33 @@ export default function Receitas() {
   const [editFator, setEditFator] = useState('1');
 
   const { data: receitas = [] } = useQuery({
-    queryKey: ['receitas'],
+    queryKey: ['receitas', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from('receitas').select('*').order('nome');
+      const { data, error } = await supabase.from('receitas').select('*').eq('user_id', user!.id).order('nome');
       if (error) throw error;
       return data as Receita[];
     },
+    enabled: !!user,
   });
 
   const { data: categorias = [] } = useQuery({
-    queryKey: ['categorias'],
+    queryKey: ['categorias', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from('categorias_receita').select('id, nome').order('nome');
+      const { data, error } = await supabase.from('categorias_receita').select('id, nome').eq('user_id', user!.id).order('nome');
       if (error) throw error;
       return data as Categoria[];
     },
+    enabled: !!user,
   });
 
   const { data: insumos = [] } = useQuery({
-    queryKey: ['insumos'],
+    queryKey: ['insumos', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from('insumos').select('id, nome, categoria, custo_unitario, unidade_medida').order('nome');
+      const { data, error } = await supabase.from('insumos').select('id, nome, categoria, custo_unitario, unidade_medida').eq('user_id', user!.id).order('nome');
       if (error) throw error;
       return data as Insumo[];
     },
+    enabled: !!user,
   });
 
   // Auto-fill unit when insumo is selected
