@@ -275,29 +275,8 @@ export default function Receitas() {
     onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
   });
 
-  // Check if recipe's month is locked (past month with sales)
-  const { data: vendasReceita = [] } = useQuery({
-    queryKey: ['vendas_receita_lock', selectedReceita],
-    enabled: !!selectedReceita,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('vendas')
-        .select('id')
-        .eq('receita_id', selectedReceita!)
-        .limit(1);
-      if (error) throw error;
-      return data;
-    },
-  });
 
-  const receitaSelecionadaForLock = receitas.find(r => r.id === selectedReceita);
-  const mesProducaoLocked = useMemo(() => {
-    if (!receitaSelecionadaForLock?.mes_producao) return false;
-    const mesProd = new Date(receitaSelecionadaForLock.mes_producao + 'T00:00:00');
-    const now = new Date();
-    const inicioMesAtual = new Date(now.getFullYear(), now.getMonth(), 1);
-    return mesProd < inicioMesAtual && vendasReceita.length > 0;
-  }, [receitaSelecionadaForLock, vendasReceita]);
+
 
   const calcItemCost = (c: Composicao) => {
     const custoUn = c.insumo?.custo_unitario ?? 0; // cost per insumo unit (e.g. per g, per ml)
@@ -487,18 +466,15 @@ export default function Receitas() {
                 type="month"
                 className="w-[180px]"
                 value={receitaSelecionada.mes_producao ? receitaSelecionada.mes_producao.slice(0, 7) : ''}
-                disabled={mesProducaoLocked}
                 onChange={e => {
                   if (e.target.value) {
                     updateMesProducaoMutation.mutate({ id: receitaSelecionada.id, mes: e.target.value + '-01' });
                   }
                 }}
               />
-              {mesProducaoLocked && (
-                <Badge variant="outline" className="text-[10px] text-muted-foreground">
-                  🔒 Mês fechado (vendas registradas)
-                </Badge>
-              )}
+              <p className="text-[10px] text-muted-foreground">
+                Mude livremente — os relatórios usam a data de cada venda.
+              </p>
             </div>
 
             {/* Card de Resumo de Custo */}
