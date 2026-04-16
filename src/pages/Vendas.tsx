@@ -333,20 +333,57 @@ export default function Vendas() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Toggle Receita / Kit */}
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant={tipoItem === 'receita' ? 'default' : 'outline'}
+                onClick={() => { setTipoItem('receita'); setKitId(''); setValorUnitario(''); }}
+                className="gap-1.5"
+              >
+                <BookOpen className="h-4 w-4" /> Produto
+              </Button>
+              <Button
+                type="button"
+                variant={tipoItem === 'kit' ? 'default' : 'outline'}
+                onClick={() => { setTipoItem('kit'); setReceitaId(''); setValorUnitario(''); }}
+                className="gap-1.5"
+                disabled={kits.length === 0}
+              >
+                <Gift className="h-4 w-4" /> Kit {kits.length > 0 && `(${kits.length})`}
+              </Button>
+            </div>
+
             <div className="space-y-2">
-              <Label>{profile === 'canine' ? 'Produto Pet' : 'Produto'}</Label>
-              <Select value={receitaId} onValueChange={setReceitaId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o produto..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {receitas.map((r: any) => (
-                    <SelectItem key={r.id} value={r.id}>
-                      {r.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>{tipoItem === 'kit' ? 'Selecione o Kit' : (profile === 'canine' ? 'Produto Pet' : 'Produto')}</Label>
+              {tipoItem === 'receita' ? (
+                <Select value={receitaId} onValueChange={setReceitaId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o produto..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {receitas.map((r: any) => (
+                      <SelectItem key={r.id} value={r.id}>{r.nome}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Select value={kitId} onValueChange={setKitId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o kit..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {kits.map((k) => (
+                      <SelectItem key={k.id} value={k.id}>
+                        🎁 {k.nome}
+                        {k.preco_final_manual != null && (
+                          <span className="text-muted-foreground ml-1 text-xs">(R$ {Number(k.preco_final_manual).toFixed(2).replace('.', ',')})</span>
+                        )}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
