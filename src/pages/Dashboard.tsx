@@ -39,7 +39,8 @@ interface Composicao {
 }
 
 interface Venda {
-  receita_id: string;
+  receita_id: string | null;
+  kit_id: string | null;
   quantidade: number;
   preco_venda: number;
   data_venda: string;
@@ -47,6 +48,12 @@ interface Venda {
   custo_insumos_snapshot: number | null;
   taxa_aplicada: number | null;
   metodo_pagamento_nome: string | null;
+}
+
+interface KitItem {
+  kit_id: string;
+  receita_id: string | null;
+  quantidade: number;
 }
 
 interface ConfigFinanceira {
@@ -278,10 +285,25 @@ export default function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('vendas')
-        .select('receita_id, quantidade, preco_venda, data_venda, valor_liquido_real, custo_insumos_snapshot, taxa_aplicada, metodo_pagamento_nome')
+        .select('receita_id, kit_id, quantidade, preco_venda, data_venda, valor_liquido_real, custo_insumos_snapshot, taxa_aplicada, metodo_pagamento_nome')
         .eq('user_id', user!.id);
       if (error) throw error;
       return (data || []) as Venda[];
+    },
+    enabled: !!user,
+  });
+
+  // Itens dos kits — para distribuir popularidade nos sub-itens (receitas)
+  const { data: kitItens = [] } = useQuery({
+    queryKey: ['kit-itens-dashboard', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('kit_itens')
+        .select('kit_id, receita_id, quantidade')
+        .eq('user_id', user!.id)
+        .eq('tipo_item', 'receita');
+      if (error) throw error;
+      return (data || []) as KitItem[];
     },
     enabled: !!user,
   });
