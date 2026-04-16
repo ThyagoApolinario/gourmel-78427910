@@ -290,14 +290,14 @@ export default function Receitas() {
     },
   });
 
+  const receitaSelecionadaForLock = receitas.find(r => r.id === selectedReceita);
   const mesProducaoLocked = useMemo(() => {
-    if (!receitaSelecionada?.mes_producao) return false;
-    const mesProd = new Date(receitaSelecionada.mes_producao + 'T00:00:00');
+    if (!receitaSelecionadaForLock?.mes_producao) return false;
+    const mesProd = new Date(receitaSelecionadaForLock.mes_producao + 'T00:00:00');
     const now = new Date();
     const inicioMesAtual = new Date(now.getFullYear(), now.getMonth(), 1);
-    // Locked if month is in the past AND has sales
     return mesProd < inicioMesAtual && vendasReceita.length > 0;
-  }, [receitaSelecionada, vendasReceita]);
+  }, [receitaSelecionadaForLock, vendasReceita]);
 
   const calcItemCost = (c: Composicao) => {
     const custoUn = c.insumo?.custo_unitario ?? 0; // cost per insumo unit (e.g. per g, per ml)
