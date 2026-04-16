@@ -17,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import Perfil from "./pages/Perfil";
 import Ajuda from "./pages/Ajuda";
 import PontoEquilibrio from "./pages/PontoEquilibrio";
+import RelatorioMetodos from "./pages/RelatorioMetodos";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import { useSessionGuard } from "./hooks/useSessionGuard";
@@ -46,6 +47,7 @@ function ProtectedRoutes() {
       <Route path="/custos-fixos" element={<CustosFixos />} />
       <Route path="/ponto-equilibrio" element={<PontoEquilibrio />} />
       <Route path="/categorias" element={<Categorias />} />
+      <Route path="/relatorio-metodos" element={<RelatorioMetodos />} />
       <Route path="/configuracoes" element={<Configuracoes />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/perfil" element={<Perfil />} />
