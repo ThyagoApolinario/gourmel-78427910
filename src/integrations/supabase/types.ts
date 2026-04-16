@@ -206,6 +206,106 @@ export type Database = {
         }
         Relationships: []
       }
+      kit_itens: {
+        Row: {
+          created_at: string
+          id: string
+          insumo_id: string | null
+          kit_id: string
+          quantidade: number
+          receita_id: string | null
+          tipo_item: Database["public"]["Enums"]["tipo_item_kit"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          insumo_id?: string | null
+          kit_id: string
+          quantidade?: number
+          receita_id?: string | null
+          tipo_item: Database["public"]["Enums"]["tipo_item_kit"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          insumo_id?: string | null
+          kit_id?: string
+          quantidade?: number
+          receita_id?: string | null
+          tipo_item?: Database["public"]["Enums"]["tipo_item_kit"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kit_itens_insumo_id_fkey"
+            columns: ["insumo_id"]
+            isOneToOne: false
+            referencedRelation: "insumos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_itens_kit_id_fkey"
+            columns: ["kit_id"]
+            isOneToOne: false
+            referencedRelation: "kits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kit_itens_receita_id_fkey"
+            columns: ["receita_id"]
+            isOneToOne: false
+            referencedRelation: "receitas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kits: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          desconto_percentual: number | null
+          descricao: string | null
+          id: string
+          nome: string
+          preco_final_manual: number | null
+          tempo_montagem_minutos: number
+          updated_at: string
+          user_id: string
+          zerar_mao_obra: boolean
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          desconto_percentual?: number | null
+          descricao?: string | null
+          id?: string
+          nome: string
+          preco_final_manual?: number | null
+          tempo_montagem_minutos?: number
+          updated_at?: string
+          user_id: string
+          zerar_mao_obra?: boolean
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          desconto_percentual?: number | null
+          descricao?: string | null
+          id?: string
+          nome?: string
+          preco_final_manual?: number | null
+          tempo_montagem_minutos?: number
+          updated_at?: string
+          user_id?: string
+          zerar_mao_obra?: boolean
+        }
+        Relationships: []
+      }
       metodos_pagamento: {
         Row: {
           ativo: boolean
@@ -323,11 +423,12 @@ export type Database = {
           custo_insumos_snapshot: number | null
           data_venda: string
           id: string
+          kit_id: string | null
           metodo_pagamento_id: string | null
           metodo_pagamento_nome: string | null
           preco_venda: number
           quantidade: number
-          receita_id: string
+          receita_id: string | null
           taxa_aplicada: number | null
           updated_at: string
           user_id: string
@@ -339,11 +440,12 @@ export type Database = {
           custo_insumos_snapshot?: number | null
           data_venda?: string
           id?: string
+          kit_id?: string | null
           metodo_pagamento_id?: string | null
           metodo_pagamento_nome?: string | null
           preco_venda: number
           quantidade?: number
-          receita_id: string
+          receita_id?: string | null
           taxa_aplicada?: number | null
           updated_at?: string
           user_id: string
@@ -355,17 +457,25 @@ export type Database = {
           custo_insumos_snapshot?: number | null
           data_venda?: string
           id?: string
+          kit_id?: string | null
           metodo_pagamento_id?: string | null
           metodo_pagamento_nome?: string | null
           preco_venda?: number
           quantidade?: number
-          receita_id?: string
+          receita_id?: string | null
           taxa_aplicada?: number | null
           updated_at?: string
           user_id?: string
           valor_liquido_real?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "vendas_kit_id_fkey"
+            columns: ["kit_id"]
+            isOneToOne: false
+            referencedRelation: "kits"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vendas_metodo_pagamento_id_fkey"
             columns: ["metodo_pagamento_id"]
@@ -406,6 +516,7 @@ export type Database = {
         | "ferramentas_software"
         | "outros"
       categoria_insumo: "ingrediente" | "embalagem"
+      tipo_item_kit: "receita" | "insumo"
       unidade_medida: "g" | "kg" | "ml" | "l" | "un"
     }
     CompositeTypes: {
@@ -545,6 +656,7 @@ export const Constants = {
         "outros",
       ],
       categoria_insumo: ["ingrediente", "embalagem"],
+      tipo_item_kit: ["receita", "insumo"],
       unidade_medida: ["g", "kg", "ml", "l", "un"],
     },
   },

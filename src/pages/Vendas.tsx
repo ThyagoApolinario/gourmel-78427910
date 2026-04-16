@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -14,7 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import {
   PawPrint, Plus, Minus, Trash2, ShoppingBag, CalendarIcon, Filter, Download,
-  FileSpreadsheet, Scale, CreditCard, Star, AlertTriangle,
+  FileSpreadsheet, Scale, CreditCard, Star, AlertTriangle, Gift, BookOpen,
 } from 'lucide-react';
 import { exportVendasXlsx } from '@/lib/export-vendas';
 import { format, subDays, subMonths, eachDayOfInterval } from 'date-fns';
@@ -24,6 +24,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { calcCustoInsumosPorUnidade } from '@/lib/calc-custo-receita';
+import { calcularKit, type FinanceConfig } from '@/lib/calc-kit';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const CANAIS = ['Instagram', 'WhatsApp', 'Feira Pet', 'Direto'];
@@ -45,7 +46,9 @@ export default function Vendas() {
   const queryClient = useQueryClient();
 
   // Form state
+  const [tipoItem, setTipoItem] = useState<'receita' | 'kit'>('receita');
   const [receitaId, setReceitaId] = useState('');
+  const [kitId, setKitId] = useState('');
   const [quantidade, setQuantidade] = useState(1);
   const [valorUnitario, setValorUnitario] = useState('');
   const [canal, setCanal] = useState('Direto');
@@ -96,6 +99,32 @@ export default function Vendas() {
     enabled: !!user,
   });
 
+  // Kits ativos
+  const { data: kits = [] } = useQuery({
+    queryKey: ['kits-vendas', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('kits')
+        .select('id, nome, preco_final_manual, desconto_percentual')
+        .eq('user_id', user!.id)
+        .eq('ativo', true)
+        .order('nome');
+      if (error) throw error;
+      return data as { id: string; nome: string; preco_final_manual: number | null; desconto_percentual: number | null }[];
+    },
+    enabled: !!user,
+  });
+
+  // Config financeira (para snapshot de kit)
+  const { data: configFin } = useQuery({
+    queryKey: ['config-vendas', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from('configuracoes_financeiras').select('*').eq('user_id', user!.id).maybeSingle();
+      return data as FinanceConfig | null;
+    },
+    enabled: !!user,
+  });
+
   // Auto-select método padrão na 1ª carga
   useMemo(() => {
     if (metodos.length > 0 && !metodoPagamentoId) {
@@ -105,7 +134,15 @@ export default function Vendas() {
   }, [metodos, metodoPagamentoId]);
 
   const receitaSelecionada = receitas.find((r) => r.id === receitaId);
-  const isVendaPorPeso = receitaSelecionada?.rendimento_unidade === 'g';
+  const kitSelecionado = kits.find((k) => k.id === kitId);
+  const isVendaPorPeso = tipoItem === 'receita' && receitaSelecionada?.rendimento_unidade === 'g';
+
+  // Auto-fill preço quando seleciona um kit que tem preço definido
+  useEffect(() => {
+    if (tipoItem === 'kit' && kitSelecionado?.preco_final_manual != null) {
+      setValorUnitario(String(kitSelecionado.preco_final_manual).replace('.', ','));
+    }
+  }, [kitId, tipoItem, kitSelecionado]);
 
   // Vendas no período
   const { data: vendas = [] } = useQuery({
@@ -118,7 +155,7 @@ export default function Vendas() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('vendas')
-        .select('*, receitas(nome)')
+        .select('*, receitas(nome), kits(nome)')
         .eq('user_id', user!.id)
         .gte('data_venda', format(dateRange.start, 'yyyy-MM-dd'))
         .lte('data_venda', format(dateRange.end, 'yyyy-MM-dd'))
@@ -164,23 +201,48 @@ export default function Vendas() {
   // Há vendas antigas sem método?
   const vendasSemMetodo = vendas.filter((v: any) => !v.metodo_pagamento_id).length;
 
-  // Create venda — com snapshot
+  // Create venda — com snapshot (suporta receita ou kit)
   const createMutation = useMutation({
     mutationFn: async () => {
       const valor = parseFloat(valorUnitario.replace(',', '.'));
-      if (!receitaId || isNaN(valor) || valor <= 0) throw new Error('Preencha todos os campos');
+      if (isNaN(valor) || valor <= 0) throw new Error('Preencha o valor');
+      if (tipoItem === 'receita' && !receitaId) throw new Error('Selecione um produto');
+      if (tipoItem === 'kit' && !kitId) throw new Error('Selecione um kit');
       if (!metodoPagamentoId) throw new Error('Selecione o método de pagamento');
 
       const metodo = metodos.find((m) => m.id === metodoPagamentoId);
       if (!metodo) throw new Error('Método de pagamento inválido');
 
       // Snapshot do custo de insumos no momento da venda
-      const custoUnitarioSnapshot = await calcCustoInsumosPorUnidade(receitaId);
-      const custoTotalSnapshot = custoUnitarioSnapshot * quantidade;
+      let custoTotalSnapshot = 0;
+      if (tipoItem === 'receita') {
+        const custoUnit = await calcCustoInsumosPorUnidade(receitaId);
+        custoTotalSnapshot = custoUnit * quantidade;
+      } else {
+        // Kit: calcula custo total via composição atual
+        if (!configFin) throw new Error('Configurações financeiras não encontradas');
+        const { data: kitData } = await supabase.from('kits').select('*').eq('id', kitId).maybeSingle();
+        const { data: kitItens } = await supabase.from('kit_itens').select('*').eq('kit_id', kitId);
+        if (!kitData || !kitItens) throw new Error('Kit não encontrado');
+        const breakdown = await calcularKit(
+          kitItens.map((i: any) => ({
+            tipo_item: i.tipo_item,
+            receita_id: i.receita_id,
+            insumo_id: i.insumo_id,
+            quantidade: Number(i.quantidade),
+          })),
+          Number(kitData.tempo_montagem_minutos) || 0,
+          kitData.zerar_mao_obra,
+          configFin,
+          metodo.taxa_percentual,
+        );
+        custoTotalSnapshot = breakdown.custoTotal * quantidade;
+      }
 
       const { error } = await supabase.from('vendas').insert({
         user_id: user!.id,
-        receita_id: receitaId,
+        receita_id: tipoItem === 'receita' ? receitaId : null,
+        kit_id: tipoItem === 'kit' ? kitId : null,
         quantidade,
         preco_venda: valor,
         data_venda: format(dataVenda, 'yyyy-MM-dd'),
@@ -196,18 +258,18 @@ export default function Vendas() {
       queryClient.invalidateQueries({ queryKey: ['vendas-filtradas'] });
       queryClient.invalidateQueries({ queryKey: ['vendas'] });
       toast({
-        title: 'Venda registrada! 🐾',
+        title: tipoItem === 'kit' ? 'Kit vendido! 🎁' : 'Venda registrada! 🐾',
         description:
           profile === 'canine'
             ? 'Petisco vendido com sucesso! Mais saúde para os pets.'
             : 'Venda registrada com sucesso!',
       });
       setReceitaId('');
+      setKitId('');
       setQuantidade(1);
       setValorUnitario('');
       setCanal('Direto');
       setDataVenda(new Date());
-      // mantém método selecionado para registro rápido
     },
     onError: (err: any) => {
       toast({ title: 'Erro ao registrar venda', description: err.message, variant: 'destructive' });
@@ -271,20 +333,57 @@ export default function Vendas() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Toggle Receita / Kit */}
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant={tipoItem === 'receita' ? 'default' : 'outline'}
+                onClick={() => { setTipoItem('receita'); setKitId(''); setValorUnitario(''); }}
+                className="gap-1.5"
+              >
+                <BookOpen className="h-4 w-4" /> Produto
+              </Button>
+              <Button
+                type="button"
+                variant={tipoItem === 'kit' ? 'default' : 'outline'}
+                onClick={() => { setTipoItem('kit'); setReceitaId(''); setValorUnitario(''); }}
+                className="gap-1.5"
+                disabled={kits.length === 0}
+              >
+                <Gift className="h-4 w-4" /> Kit {kits.length > 0 && `(${kits.length})`}
+              </Button>
+            </div>
+
             <div className="space-y-2">
-              <Label>{profile === 'canine' ? 'Produto Pet' : 'Produto'}</Label>
-              <Select value={receitaId} onValueChange={setReceitaId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o produto..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {receitas.map((r: any) => (
-                    <SelectItem key={r.id} value={r.id}>
-                      {r.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>{tipoItem === 'kit' ? 'Selecione o Kit' : (profile === 'canine' ? 'Produto Pet' : 'Produto')}</Label>
+              {tipoItem === 'receita' ? (
+                <Select value={receitaId} onValueChange={setReceitaId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o produto..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {receitas.map((r: any) => (
+                      <SelectItem key={r.id} value={r.id}>{r.nome}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Select value={kitId} onValueChange={setKitId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o kit..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {kits.map((k) => (
+                      <SelectItem key={k.id} value={k.id}>
+                        🎁 {k.nome}
+                        {k.preco_final_manual != null && (
+                          <span className="text-muted-foreground ml-1 text-xs">(R$ {Number(k.preco_final_manual).toFixed(2).replace('.', ',')})</span>
+                        )}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -431,7 +530,7 @@ export default function Vendas() {
             <Button
               className="w-full gap-2 mt-2"
               size="lg"
-              disabled={!receitaId || !valorUnitario || !metodoPagamentoId || createMutation.isPending}
+              disabled={(tipoItem === 'receita' ? !receitaId : !kitId) || !valorUnitario || !metodoPagamentoId || createMutation.isPending}
               onClick={() => createMutation.mutate()}
             >
               <PawPrint className="h-5 w-5" />
@@ -599,7 +698,7 @@ export default function Vendas() {
                     const rows = vendasFiltradas
                       .map(
                         (v: any) =>
-                          `${v.receitas?.nome || 'Removido'};${v.quantidade};${Number(v.preco_venda)
+                          `${v.kits?.nome || v.receitas?.nome || 'Removido'};${v.quantidade};${Number(v.preco_venda)
                             .toFixed(2)
                             .replace('.', ',')};${(v.preco_venda * v.quantidade)
                             .toFixed(2)
@@ -643,7 +742,7 @@ export default function Vendas() {
                           : `${format(customInicio, 'dd/MM')} a ${format(customFim, 'dd/MM')}`;
                     await exportVendasXlsx(
                       vendasFiltradas.map((v: any) => ({
-                        produto: v.receitas?.nome || 'Removido',
+                        produto: v.kits?.nome || v.receitas?.nome || 'Removido',
                         quantidade: v.quantidade,
                         valorUnitario: Number(v.preco_venda),
                         total: v.preco_venda * v.quantidade,
@@ -674,8 +773,9 @@ export default function Vendas() {
                 <Card key={v.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="py-3 px-4 flex items-center justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">
-                        {v.receitas?.nome || 'Produto removido'}
+                      <div className="font-medium text-sm truncate flex items-center gap-1.5">
+                        {v.kit_id && <Gift className="h-3.5 w-3.5 text-accent shrink-0" />}
+                        {v.kits?.nome || v.receitas?.nome || 'Produto removido'}
                       </div>
                       <div className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5 flex-wrap">
                         <span>
