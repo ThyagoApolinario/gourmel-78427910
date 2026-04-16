@@ -186,6 +186,7 @@ export default function Receitas() {
         rendimento_quantidade: formRendQtd ? parseFloat(formRendQtd) : null,
         rendimento_unidade: formRendUn || 'un',
         tempo_producao_minutos: formTempoMin ? parseFloat(formTempoMin) : null,
+        mes_producao: formMesProducao,
       });
       if (error) throw error;
     },
