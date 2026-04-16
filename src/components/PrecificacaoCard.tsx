@@ -6,16 +6,23 @@ import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { TrendingUp, AlertTriangle, DollarSign, Save, Scale, Cookie } from 'lucide-react';
+import { TrendingUp, AlertTriangle, DollarSign, Save, Scale, Cookie, CreditCard, Star } from 'lucide-react';
 import { formatarCusto } from '@/lib/smart-units';
 import { useToast } from '@/hooks/use-toast';
 
 interface ConfigFinanceira {
-  taxa_cartao: number;
   impostos: number;
   margem_desejada: number;
   pro_labore: number;
   horas_mes: number;
+}
+
+interface MetodoPagamento {
+  id: string;
+  nome: string;
+  taxa_percentual: number;
+  is_padrao_precificacao: boolean;
+  ativo: boolean;
 }
 
 interface PrecificacaoCardProps {
@@ -39,7 +46,6 @@ export function PrecificacaoCard({
 }: PrecificacaoCardProps) {
   const isGramas = rendimentoUnidade === 'g';
   const unLabel = isGramas ? 'Grama' : 'Unidade';
-  const unAbrev = isGramas ? 'g' : 'un';
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -58,10 +64,30 @@ export function PrecificacaoCard({
     },
   });
 
+  const { data: metodos = [] } = useQuery({
+    queryKey: ['metodos_pagamento'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('metodos_pagamento')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('ativo', true)
+        .order('ordem');
+      if (error) throw error;
+      return data as MetodoPagamento[];
+    },
+  });
+
+  const metodoPadrao = metodos.find((m) => m.is_padrao_precificacao);
+  const taxaPadrao = metodoPadrao?.taxa_percentual ?? 0;
+
   const defaultMargem = margemSalva ?? config?.margem_desejada ?? 30;
   const [margemSlider, setMargemSlider] = useState<number | null>(null);
   const margem = margemSlider ?? defaultMargem;
-  const hasUnsavedMargem = margemSlider !== null && margemSlider !== (margemSalva ?? config?.margem_desejada ?? 30);
+  const hasUnsavedMargem =
+    margemSlider !== null && margemSlider !== (margemSalva ?? config?.margem_desejada ?? 30);
 
   const saveMargemMutation = useMutation({
     mutationFn: async () => {
@@ -79,14 +105,13 @@ export function PrecificacaoCard({
     onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
   });
 
-  const taxaCartao = config?.taxa_cartao ?? 5;
   const impostos = config?.impostos ?? 5;
   const custoMinuto = config ? config.pro_labore / (config.horas_mes * 60) : 0;
 
   const custoMaoDeObra = tempoProducao ? tempoProducao * custoMinuto : 0;
   const custoVariavelTotal = custoInsumos + custoEmbalagens + custoMaoDeObra;
 
-  const totalPercentuais = (taxaCartao + impostos + margem) / 100;
+  const totalPercentuais = (taxaPadrao + impostos + margem) / 100;
   const isMargemCritica = totalPercentuais >= 1;
 
   const precoSugerido = useMemo(() => {
@@ -94,21 +119,37 @@ export function PrecificacaoCard({
     return custoVariavelTotal / (1 - totalPercentuais);
   }, [custoVariavelTotal, totalPercentuais, isMargemCritica]);
 
-  const precoSugeridoPorUnidade = precoSugerido && rendimentoQuantidade
-    ? precoSugerido / rendimentoQuantidade
-    : null;
+  const precoSugeridoPorUnidade =
+    precoSugerido && rendimentoQuantidade ? precoSugerido / rendimentoQuantidade : null;
 
-  const lucroLiquidoPorUnidade = precoSugeridoPorUnidade && rendimentoQuantidade
-    ? precoSugeridoPorUnidade - (custoVariavelTotal / rendimentoQuantidade)
-      - (precoSugeridoPorUnidade * (taxaCartao + impostos) / 100)
-    : null;
+  const lucroLiquidoPorUnidade =
+    precoSugeridoPorUnidade && rendimentoQuantidade
+      ? precoSugeridoPorUnidade -
+        custoVariavelTotal / rendimentoQuantidade -
+        (precoSugeridoPorUnidade * (taxaPadrao + impostos)) / 100
+      : null;
 
   if (!config) {
     return (
       <Card className="border-warning/30 bg-warning/5">
         <CardContent className="p-4 text-center">
           <p className="text-sm text-muted-foreground">
-            ⚙️ Configure suas <strong>Configurações Financeiras</strong> no menu lateral para ativar a precificação.
+            ⚙️ Configure suas <strong>Configurações Financeiras</strong> no menu lateral para ativar a
+            precificação.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!metodoPadrao) {
+    return (
+      <Card className="border-warning/30 bg-warning/5">
+        <CardContent className="p-4 text-center space-y-2">
+          <CreditCard className="h-6 w-6 mx-auto text-warning" />
+          <p className="text-sm">
+            Nenhum <strong>método de pagamento padrão</strong> definido. Vá em Configurações e marque um
+            método com a estrela ⭐ para ativar a precificação.
           </p>
         </CardContent>
       </Card>
@@ -139,14 +180,18 @@ export function PrecificacaoCard({
             <p className="font-semibold text-sm">
               {tempoProducao ? formatarCusto(custoMaoDeObra) : '—'}
             </p>
-            {tempoProducao && (
-              <p className="text-[10px] text-muted-foreground">{tempoProducao} min</p>
-            )}
+            {tempoProducao && <p className="text-[10px] text-muted-foreground">{tempoProducao} min</p>}
           </div>
           <div className="text-center p-2 rounded-lg bg-primary/10">
             <p className="text-[10px] text-muted-foreground">Custo Total</p>
             <p className="font-bold text-sm text-primary">{formatarCusto(custoVariavelTotal)}</p>
           </div>
+        </div>
+
+        {/* Padrão badge */}
+        <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+          <Star className="h-3 w-3 text-accent" />
+          Calculado com taxa padrão: <strong>{metodoPadrao.nome}</strong> ({taxaPadrao}%)
         </div>
 
         {/* Margin slider */}
@@ -155,9 +200,13 @@ export function PrecificacaoCard({
             <label className="text-sm font-medium">Margem de Contribuição</label>
             <div className="flex items-center gap-2">
               {margemSalva !== null && (
-                <Badge variant="secondary" className="text-[10px]">Personalizada</Badge>
+                <Badge variant="secondary" className="text-[10px]">
+                  Personalizada
+                </Badge>
               )}
-              <Badge variant="outline" className="font-mono">{margem.toFixed(0)}%</Badge>
+              <Badge variant="outline" className="font-mono">
+                {margem.toFixed(0)}%
+              </Badge>
             </div>
           </div>
           <Slider
@@ -170,7 +219,10 @@ export function PrecificacaoCard({
           />
           <div className="flex justify-between text-[10px] text-muted-foreground">
             <span>10%</span>
-            <span className="hidden sm:inline text-xs">Taxas: {taxaCartao}% + Imp: {impostos}% + Margem: {margem.toFixed(0)}% = {(totalPercentuais * 100).toFixed(0)}%</span>
+            <span className="hidden sm:inline text-xs">
+              Taxa: {taxaPadrao}% + Imp: {impostos}% + Margem: {margem.toFixed(0)}% ={' '}
+              {(totalPercentuais * 100).toFixed(0)}%
+            </span>
             <span className="sm:hidden text-xs">Total: {(totalPercentuais * 100).toFixed(0)}%</span>
             <span>80%</span>
           </div>
@@ -193,13 +245,13 @@ export function PrecificacaoCard({
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Margem crítica!</strong> A soma de taxas + impostos + margem é ≥ 100%.
-              Reduza a margem ou revise as taxas.
+              <strong>Margem crítica!</strong> A soma de taxas + impostos + margem é ≥ 100%. Reduza a
+              margem ou revise as taxas.
             </AlertDescription>
           </Alert>
         )}
 
-        {/* Price result — without break-even (moved to /ponto-equilibrio) */}
+        {/* Price result */}
         {!isMargemCritica && precoSugerido !== null && (
           <Card className="border-success/30 bg-success/5">
             <CardContent className="p-3 sm:p-4">
@@ -208,20 +260,37 @@ export function PrecificacaoCard({
                   <p className="text-[10px] sm:text-xs text-muted-foreground flex items-center justify-center gap-1">
                     <DollarSign className="h-3 w-3" /> Preço Total
                   </p>
-                  <p className="font-bold text-lg sm:text-xl text-success">{formatarCusto(precoSugerido)}</p>
+                  <p className="font-bold text-lg sm:text-xl text-success">
+                    {formatarCusto(precoSugerido)}
+                  </p>
                 </div>
                 <div className="text-center">
                   <p className="text-[10px] sm:text-xs text-muted-foreground flex items-center justify-center gap-1">
-                    {isGramas ? <Scale className="h-3 w-3" /> : <Cookie className="h-3 w-3" />} Preço/{unLabel}
+                    {isGramas ? <Scale className="h-3 w-3" /> : <Cookie className="h-3 w-3" />} Preço/
+                    {unLabel}
                   </p>
                   <p className="font-bold text-base sm:text-lg">
-                    {precoSugeridoPorUnidade ? (isGramas ? `R$ ${precoSugeridoPorUnidade.toFixed(4).replace('.', ',')}` : formatarCusto(precoSugeridoPorUnidade)) : '—'}
+                    {precoSugeridoPorUnidade
+                      ? isGramas
+                        ? `R$ ${precoSugeridoPorUnidade.toFixed(4).replace('.', ',')}`
+                        : formatarCusto(precoSugeridoPorUnidade)
+                      : '—'}
                   </p>
                 </div>
                 <div className="text-center">
                   <p className="text-[10px] sm:text-xs text-muted-foreground">Lucro/{unLabel}</p>
-                  <p className={`font-bold text-base sm:text-lg ${lucroLiquidoPorUnidade && lucroLiquidoPorUnidade > 0 ? 'text-success' : 'text-destructive'}`}>
-                    {lucroLiquidoPorUnidade ? (isGramas ? `R$ ${lucroLiquidoPorUnidade.toFixed(4).replace('.', ',')}` : formatarCusto(lucroLiquidoPorUnidade)) : '—'}
+                  <p
+                    className={`font-bold text-base sm:text-lg ${
+                      lucroLiquidoPorUnidade && lucroLiquidoPorUnidade > 0
+                        ? 'text-success'
+                        : 'text-destructive'
+                    }`}
+                  >
+                    {lucroLiquidoPorUnidade
+                      ? isGramas
+                        ? `R$ ${lucroLiquidoPorUnidade.toFixed(4).replace('.', ',')}`
+                        : formatarCusto(lucroLiquidoPorUnidade)
+                      : '—'}
                   </p>
                 </div>
               </div>
@@ -229,9 +298,56 @@ export function PrecificacaoCard({
           </Card>
         )}
 
+        {/* Simulação por método de pagamento */}
+        {!isMargemCritica && precoSugerido !== null && metodos.length > 0 && (
+          <Card className="border-accent/20 bg-accent/5">
+            <CardContent className="p-3 sm:p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-accent" />
+                <span className="font-semibold text-sm">Simulação de Recebimento</span>
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                Quanto sobra líquido se vender por <strong>{formatarCusto(precoSugerido)}</strong> em
+                cada método (já descontando a taxa):
+              </p>
+              <div className="space-y-1.5">
+                {metodos.map((m) => {
+                  const taxaValor = (precoSugerido * m.taxa_percentual) / 100;
+                  const liquido = precoSugerido - taxaValor;
+                  const isPadrao = m.is_padrao_precificacao;
+                  return (
+                    <div
+                      key={m.id}
+                      className={`flex items-center justify-between gap-2 px-2 py-1.5 rounded-md text-sm ${
+                        isPadrao ? 'bg-accent/15 font-medium' : 'bg-card'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        {isPadrao && <Star className="h-3 w-3 text-accent shrink-0" />}
+                        <span className="truncate">{m.nome}</span>
+                        <Badge variant="outline" className="text-[10px] shrink-0">
+                          {m.taxa_percentual}%
+                        </Badge>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="font-mono text-success">{formatarCusto(liquido)}</span>
+                        {m.taxa_percentual > 0 && (
+                          <span className="text-[10px] text-muted-foreground ml-1.5">
+                            (−{formatarCusto(taxaValor)})
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Formula explanation */}
         <p className="text-[10px] text-muted-foreground text-center">
-          Preço = Custo Variável ÷ (1 − Taxas% − Impostos% − Margem%)
+          Preço = Custo Variável ÷ (1 − Taxa Padrão% − Impostos% − Margem%)
         </p>
       </CardContent>
     </Card>
