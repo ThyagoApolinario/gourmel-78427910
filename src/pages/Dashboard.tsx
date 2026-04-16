@@ -471,7 +471,7 @@ export default function Dashboard() {
     }
 
     return { produtos, mediaVolume, mediaMargem };
-  }, [receitas, composicoes, vendasFiltradas, config]);
+  }, [receitas, composicoes, vendasFiltradas, config, kitItens]);
 
   // Group by quadrant
   const produtosPorQuadrante = useMemo(() => {
