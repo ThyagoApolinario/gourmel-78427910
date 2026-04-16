@@ -46,16 +46,14 @@ export default function PontoEquilibrio() {
   const mesStart = selectedMonth;
   const mesEnd = format(endOfMonth(parseISO(selectedMonth)), 'yyyy-MM-dd');
 
-  // Receitas for the selected month
-  const { data: receitas = [] } = useQuery({
-    queryKey: ['receitas_pe', selectedMonth],
+  // All user recipes (not filtered by month — we show any that have sales or are assigned to month)
+  const { data: allReceitas = [] } = useQuery({
+    queryKey: ['receitas_pe_all'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('receitas')
         .select('id, nome, rendimento_quantidade, rendimento_unidade, tempo_producao_minutos, margem_desejada, mes_producao')
         .eq('user_id', user!.id)
-        .gte('mes_producao', mesStart)
-        .lte('mes_producao', mesEnd)
         .order('nome');
       if (error) throw error;
       return data;
@@ -63,20 +61,20 @@ export default function PontoEquilibrio() {
     enabled: !!user,
   });
 
-  // Composições for those recipes
-  const receitaIds = receitas.map(r => r.id);
+  // Composições for all recipes
+  const allReceitaIds = allReceitas.map(r => r.id);
   const { data: composicoes = [] } = useQuery({
-    queryKey: ['composicao_pe', receitaIds],
+    queryKey: ['composicao_pe', allReceitaIds],
     queryFn: async () => {
-      if (receitaIds.length === 0) return [];
+      if (allReceitaIds.length === 0) return [];
       const { data, error } = await supabase
         .from('composicao_receita')
         .select('receita_id, quantidade, fator_rendimento, unidade_medida, insumo:insumos(custo_unitario, unidade_medida, categoria)')
-        .in('receita_id', receitaIds);
+        .in('receita_id', allReceitaIds);
       if (error) throw error;
       return data as any[];
     },
-    enabled: receitaIds.length > 0,
+    enabled: allReceitaIds.length > 0,
   });
 
   // Vendas in the month
