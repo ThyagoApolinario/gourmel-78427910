@@ -46,16 +46,14 @@ export default function PontoEquilibrio() {
   const mesStart = selectedMonth;
   const mesEnd = format(endOfMonth(parseISO(selectedMonth)), 'yyyy-MM-dd');
 
-  // Receitas for the selected month
-  const { data: receitas = [] } = useQuery({
-    queryKey: ['receitas_pe', selectedMonth],
+  // All user recipes (not filtered by month — we show any that have sales or are assigned to month)
+  const { data: allReceitas = [] } = useQuery({
+    queryKey: ['receitas_pe_all'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('receitas')
         .select('id, nome, rendimento_quantidade, rendimento_unidade, tempo_producao_minutos, margem_desejada, mes_producao')
         .eq('user_id', user!.id)
-        .gte('mes_producao', mesStart)
-        .lte('mes_producao', mesEnd)
         .order('nome');
       if (error) throw error;
       return data;
@@ -63,20 +61,20 @@ export default function PontoEquilibrio() {
     enabled: !!user,
   });
 
-  // Composições for those recipes
-  const receitaIds = receitas.map(r => r.id);
+  // Composições for all recipes
+  const allReceitaIds = allReceitas.map(r => r.id);
   const { data: composicoes = [] } = useQuery({
-    queryKey: ['composicao_pe', receitaIds],
+    queryKey: ['composicao_pe', allReceitaIds],
     queryFn: async () => {
-      if (receitaIds.length === 0) return [];
+      if (allReceitaIds.length === 0) return [];
       const { data, error } = await supabase
         .from('composicao_receita')
         .select('receita_id, quantidade, fator_rendimento, unidade_medida, insumo:insumos(custo_unitario, unidade_medida, categoria)')
-        .in('receita_id', receitaIds);
+        .in('receita_id', allReceitaIds);
       if (error) throw error;
       return data as any[];
     },
-    enabled: receitaIds.length > 0,
+    enabled: allReceitaIds.length > 0,
   });
 
   // Vendas in the month
@@ -132,6 +130,18 @@ export default function PontoEquilibrio() {
   const taxaCartao = config?.taxa_cartao ?? 5;
   const impostos = config?.impostos ?? 5;
   const custoMinuto = config ? config.pro_labore / (config.horas_mes * 60) : 0;
+
+  // Receitas relevant to this month: assigned to this month OR have sales in this month
+  const receitaIdsComVendas = useMemo(() => new Set(vendas.map(v => v.receita_id)), [vendas]);
+  const receitas = useMemo(() => {
+    return allReceitas.filter(r => {
+      // Has sales in the selected month
+      if (receitaIdsComVendas.has(r.id)) return true;
+      // Or is assigned to produce in this month
+      if (r.mes_producao && r.mes_producao >= mesStart && r.mes_producao <= mesEnd) return true;
+      return false;
+    });
+  }, [allReceitas, receitaIdsComVendas, mesStart, mesEnd]);
 
   // Per-recipe breakdown
   const receitaBreakdown = useMemo(() => {
