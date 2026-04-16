@@ -109,34 +109,39 @@ export default function CustosFixos() {
 
   // Fetch composicoes for margin calculation
   const { data: composicoes = [] } = useQuery({
-    queryKey: ['composicao_custos'],
+    queryKey: ['composicao_custos', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('composicao_receita')
-        .select('receita_id, quantidade, fator_rendimento, insumo:insumos(custo_unitario)');
+        .select('receita_id, quantidade, fator_rendimento, insumo:insumos(custo_unitario)')
+        .eq('user_id', user!.id);
       if (error) throw error;
       return data as any[];
     },
+    enabled: !!user,
   });
 
   const { data: receitasData = [] } = useQuery({
-    queryKey: ['receitas_custos'],
+    queryKey: ['receitas_custos', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from('receitas').select('id, rendimento_quantidade');
+      const { data, error } = await supabase.from('receitas').select('id, rendimento_quantidade').eq('user_id', user!.id);
       if (error) throw error;
       return data as { id: string; rendimento_quantidade: number | null }[];
     },
+    enabled: !!user,
   });
 
   const { data: vendasAll = [] } = useQuery({
-    queryKey: ['vendas_all_custos'],
+    queryKey: ['vendas_all_custos', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('vendas')
-        .select('receita_id, preco_venda, quantidade');
+        .select('receita_id, preco_venda, quantidade')
+        .eq('user_id', user!.id);
       if (error) throw error;
       return data as { receita_id: string; preco_venda: number; quantidade: number }[];
     },
+    enabled: !!user,
   });
 
   // Create/Update mutation

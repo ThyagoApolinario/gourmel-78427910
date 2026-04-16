@@ -40,15 +40,17 @@ export default function Insumos() {
   const { labels } = useProfile();
 
   const { data: insumos = [], isLoading } = useQuery({
-    queryKey: ['insumos'],
+    queryKey: ['insumos', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('insumos')
         .select('*')
+        .eq('user_id', user!.id)
         .order('nome');
       if (error) throw error;
       return data as Insumo[];
     },
+    enabled: !!user,
   });
 
   const createMutation = useMutation({

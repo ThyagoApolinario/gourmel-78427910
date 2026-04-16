@@ -248,41 +248,46 @@ export default function Dashboard() {
 
   // Fetch all data
   const { data: receitas = [] } = useQuery({
-    queryKey: ['receitas'],
+    queryKey: ['receitas', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from('receitas').select('id, nome, tempo_producao_minutos, rendimento_quantidade, rendimento_unidade');
+      const { data, error } = await supabase.from('receitas').select('id, nome, tempo_producao_minutos, rendimento_quantidade, rendimento_unidade').eq('user_id', user!.id);
       if (error) throw error;
       return data as Receita[];
     },
+    enabled: !!user,
   });
 
   const { data: composicoes = [] } = useQuery({
-    queryKey: ['composicao_all'],
+    queryKey: ['composicao_all', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('composicao_receita')
-        .select('receita_id, insumo_id, quantidade, fator_rendimento, insumo:insumos(custo_unitario, categoria)');
+        .select('receita_id, insumo_id, quantidade, fator_rendimento, insumo:insumos(custo_unitario, categoria)')
+        .eq('user_id', user!.id);
       if (error) throw error;
       return (data || []) as Composicao[];
     },
+    enabled: !!user,
   });
 
   const { data: vendas = [] } = useQuery({
-    queryKey: ['vendas'],
+    queryKey: ['vendas', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from('vendas').select('receita_id, quantidade, preco_venda, data_venda');
+      const { data, error } = await supabase.from('vendas').select('receita_id, quantidade, preco_venda, data_venda').eq('user_id', user!.id);
       if (error) throw error;
       return (data || []) as Venda[];
     },
+    enabled: !!user,
   });
 
   const { data: config } = useQuery({
-    queryKey: ['configuracoes_financeiras'],
+    queryKey: ['configuracoes_financeiras', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from('configuracoes_financeiras').select('*').maybeSingle();
+      const { data, error } = await supabase.from('configuracoes_financeiras').select('*').eq('user_id', user!.id).maybeSingle();
       if (error) throw error;
       return data as ConfigFinanceira | null;
     },
+    enabled: !!user,
   });
 
   // Custos fixos for breakeven bar
