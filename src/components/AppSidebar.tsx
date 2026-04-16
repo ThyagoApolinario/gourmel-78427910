@@ -32,6 +32,7 @@ export function AppSidebar() {
     { title: labels.categorias, url: '/categorias', icon: Tags },
     { title: labels.dashboard, url: '/dashboard', icon: BarChart3 },
     { title: labels.relatorio, url: '/relatorio', icon: CalendarRange },
+    { title: labels.relatorioMetodos, url: '/relatorio-metodos', icon: CreditCard },
     { title: labels.custosFixos, url: '/custos-fixos', icon: Wallet },
     { title: labels.pontoEquilibrio, url: '/ponto-equilibrio', icon: Target },
     { title: labels.configuracoes, url: '/configuracoes', icon: Settings },
