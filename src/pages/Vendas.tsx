@@ -99,6 +99,32 @@ export default function Vendas() {
     enabled: !!user,
   });
 
+  // Kits ativos
+  const { data: kits = [] } = useQuery({
+    queryKey: ['kits-vendas', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('kits')
+        .select('id, nome, preco_final_manual, desconto_percentual')
+        .eq('user_id', user!.id)
+        .eq('ativo', true)
+        .order('nome');
+      if (error) throw error;
+      return data as { id: string; nome: string; preco_final_manual: number | null; desconto_percentual: number | null }[];
+    },
+    enabled: !!user,
+  });
+
+  // Config financeira (para snapshot de kit)
+  const { data: configFin } = useQuery({
+    queryKey: ['config-vendas', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from('configuracoes_financeiras').select('*').eq('user_id', user!.id).maybeSingle();
+      return data as FinanceConfig | null;
+    },
+    enabled: !!user,
+  });
+
   // Auto-select método padrão na 1ª carga
   useMemo(() => {
     if (metodos.length > 0 && !metodoPagamentoId) {
