@@ -47,6 +47,7 @@ function ProtectedRoutes() {
       <Route path="/custos-fixos" element={<CustosFixos />} />
       <Route path="/ponto-equilibrio" element={<PontoEquilibrio />} />
       <Route path="/categorias" element={<Categorias />} />
+      <Route path="/relatorio-metodos" element={<RelatorioMetodos />} />
       <Route path="/configuracoes" element={<Configuracoes />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/perfil" element={<Perfil />} />
