@@ -8,8 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { KitForm } from '@/components/KitForm';
-import { Gift, Plus, Pencil, Trash2, PartyPopper, Power, PowerOff } from 'lucide-react';
+import { Gift, Plus, Pencil, Trash2, PartyPopper, Power, PowerOff, Share2 } from 'lucide-react';
 import { formatarCusto } from '@/lib/smart-units';
+import { KitShareDialog } from '@/components/KitShareDialog';
 
 interface Kit {
   id: string;
@@ -28,6 +29,7 @@ export default function Kits() {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [shareKitId, setShareKitId] = useState<string | null>(null);
 
   const { data: kits = [] } = useQuery({
     queryKey: ['kits', user?.id],
@@ -168,6 +170,16 @@ export default function Kits() {
                         <Pencil className="h-3.5 w-3.5" /> Editar
                       </Button>
                       <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1 border-accent/40 hover:bg-accent/10 hover:text-accent"
+                        onClick={() => setShareKitId(kit.id)}
+                        title="Compartilhar nas redes"
+                      >
+                        <Share2 className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Compartilhar</span>
+                      </Button>
+                      <Button
                         size="icon"
                         variant="ghost"
                         title={kit.ativo ? 'Arquivar' : 'Reativar'}
@@ -190,6 +202,14 @@ export default function Kits() {
               );
             })}
           </div>
+        )}
+
+        {shareKitId && (
+          <KitShareDialog
+            open={!!shareKitId}
+            onOpenChange={(o) => !o && setShareKitId(null)}
+            kitId={shareKitId}
+          />
         )}
       </div>
     </AppLayout>
