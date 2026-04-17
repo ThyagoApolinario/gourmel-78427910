@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import { formatarCusto } from '@/lib/smart-units';
 
 export type KitTemplateId = 'festivo' | 'clean' | 'colorido';
+export type KitFormat = 'square' | 'story';
 
 export interface KitTemplateOption {
   id: KitTemplateId;
@@ -16,6 +17,11 @@ export const KIT_TEMPLATES: KitTemplateOption[] = [
   { id: 'colorido', label: 'Colorido', description: 'Vibrante e divertido', emoji: '🌈' },
 ];
 
+export const KIT_FORMATS: { id: KitFormat; label: string; sublabel: string; width: number; height: number }[] = [
+  { id: 'square', label: 'Quadrado', sublabel: '1080×1080 · Feed', width: 1080, height: 1080 },
+  { id: 'story', label: 'Story', sublabel: '1080×1920 · Stories', width: 1080, height: 1920 },
+];
+
 export interface KitMarketingCardProps {
   nome: string;
   descricao?: string | null;
@@ -25,23 +31,27 @@ export interface KitMarketingCardProps {
   economiaPct: number;
   brandName?: string;
   template?: KitTemplateId;
+  format?: KitFormat;
 }
 
 /**
  * Visual card for sharing kits on social media.
  * Rendered offscreen and converted to PNG via html-to-image.
- * Designed at 1080×1080 (Instagram square).
+ * Supports two formats: 1080×1080 (Instagram square) and 1080×1920 (Stories).
  */
 export const KitMarketingCard = forwardRef<HTMLDivElement, KitMarketingCardProps>(
-  ({ template = 'festivo', ...props }, ref) => {
-    if (template === 'clean') return <CleanTemplate ref={ref} {...props} />;
-    if (template === 'colorido') return <ColoridoTemplate ref={ref} {...props} />;
-    return <FestivoTemplate ref={ref} {...props} />;
+  ({ template = 'festivo', format = 'square', ...props }, ref) => {
+    if (template === 'clean') return <CleanTemplate ref={ref} format={format} {...props} />;
+    if (template === 'colorido') return <ColoridoTemplate ref={ref} format={format} {...props} />;
+    return <FestivoTemplate ref={ref} format={format} {...props} />;
   },
 );
 KitMarketingCard.displayName = 'KitMarketingCard';
 
-type TemplateProps = Omit<KitMarketingCardProps, 'template'>;
+type TemplateProps = Omit<KitMarketingCardProps, 'template'> & { format: KitFormat };
+
+const dimensions = (format: KitFormat) =>
+  format === 'story' ? { width: 1080, height: 1920 } : { width: 1080, height: 1080 };
 
 /* ============================================================
    TEMPLATE 1 — FESTIVO (verde sálvia + terracota)
