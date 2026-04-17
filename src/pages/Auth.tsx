@@ -20,6 +20,20 @@ export default function Auth() {
   const [resetOpen, setResetOpen] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
 
+  const getAuthErrorMessage = (error: any) => {
+    const message = String(error?.message || '').toLowerCase();
+
+    if (message.includes('invalid login credentials')) {
+      return 'Email ou senha inválidos.';
+    }
+
+    if (message.includes('email not confirmed')) {
+      return 'Seu email ainda não foi confirmado. Verifique sua caixa de entrada antes de entrar.';
+    }
+
+    return error?.message || 'Não foi possível autenticar agora.';
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -27,7 +41,7 @@ export default function Auth() {
       await signIn(email, password);
       toast({ title: 'Bem-vinda de volta! 🎂' });
     } catch (error: any) {
-      toast({ title: 'Erro ao entrar', description: error.message, variant: 'destructive' });
+      toast({ title: 'Erro ao entrar', description: getAuthErrorMessage(error), variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -40,7 +54,7 @@ export default function Auth() {
       await signUp(email, password);
       toast({ title: 'Conta criada!', description: 'Verifique seu email para confirmar.' });
     } catch (error: any) {
-      toast({ title: 'Erro ao criar conta', description: error.message, variant: 'destructive' });
+      toast({ title: 'Erro ao criar conta', description: getAuthErrorMessage(error), variant: 'destructive' });
     } finally {
       setLoading(false);
     }
