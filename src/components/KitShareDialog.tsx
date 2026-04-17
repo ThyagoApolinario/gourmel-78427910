@@ -15,8 +15,9 @@ import {
   Download, Share2, MessageCircle, Instagram, Copy, CheckCircle2, Sparkles,
 } from 'lucide-react';
 import { calcularKit, calcEconomia, type FinanceConfig } from '@/lib/calc-kit';
-import { KitMarketingCard } from './KitMarketingCard';
+import { KitMarketingCard, KIT_TEMPLATES, type KitTemplateId } from './KitMarketingCard';
 import { formatarCusto } from '@/lib/smart-units';
+import { cn } from '@/lib/utils';
 
 interface KitShareDialogProps {
   open: boolean;
@@ -31,6 +32,7 @@ export function KitShareDialog({ open, onOpenChange, kitId }: KitShareDialogProp
   const cardRef = useRef<HTMLDivElement>(null);
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [template, setTemplate] = useState<KitTemplateId>('festivo');
 
   // Config + método padrão (para calcular preço sugerido)
   const { data: config } = useQuery({
