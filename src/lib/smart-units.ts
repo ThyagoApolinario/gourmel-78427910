@@ -88,7 +88,7 @@ export function formatarCusto(valor: number): string {
     style: 'currency',
     currency: 'BRL',
     minimumFractionDigits: 2,
-    maximumFractionDigits: 4,
+    maximumFractionDigits: 2,
   }).format(valor);
 }
 
