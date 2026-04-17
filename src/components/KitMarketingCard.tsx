@@ -57,22 +57,24 @@ const dimensions = (format: KitFormat) =>
    TEMPLATE 1 — FESTIVO (verde sálvia + terracota)
    ============================================================ */
 const FestivoTemplate = forwardRef<HTMLDivElement, TemplateProps>(
-  ({ nome, descricao, itens, preco, precoIndividual, economiaPct, brandName = 'Confeitaria' }, ref) => {
+  ({ nome, descricao, itens, preco, precoIndividual, economiaPct, brandName = 'Confeitaria', format }, ref) => {
     const itensReceitas = itens.filter((i) => i.tipo === 'receita');
     const itensInsumos = itens.filter((i) => i.tipo === 'insumo');
+    const { width, height } = dimensions(format);
+    const isStory = format === 'story';
 
     return (
       <div
         ref={ref}
         style={{
-          width: 1080,
-          height: 1080,
+          width,
+          height,
           background: 'linear-gradient(135deg, hsl(140, 25%, 38%) 0%, hsl(140, 30%, 28%) 100%)',
           fontFamily: '"Poppins", "Quicksand", sans-serif',
           color: 'hsl(40, 30%, 96%)',
           position: 'relative',
           overflow: 'hidden',
-          padding: 80,
+          padding: isStory ? '120px 80px' : 80,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
