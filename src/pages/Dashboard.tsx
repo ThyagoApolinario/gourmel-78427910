@@ -35,7 +35,8 @@ interface Composicao {
   insumo_id: string;
   quantidade: number;
   fator_rendimento: number;
-  insumo: { custo_unitario: number | null; categoria: string } | null;
+  unidade_medida: 'g' | 'kg' | 'ml' | 'l' | 'un';
+  insumo: { custo_unitario: number | null; categoria: string; unidade_medida: 'g' | 'kg' | 'ml' | 'l' | 'un' } | null;
 }
 
 interface Venda {
@@ -272,7 +273,7 @@ export default function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('composicao_receita')
-        .select('receita_id, insumo_id, quantidade, fator_rendimento, insumo:insumos(custo_unitario, categoria)')
+        .select('receita_id, insumo_id, quantidade, fator_rendimento, unidade_medida, insumo:insumos(custo_unitario, categoria, unidade_medida)')
         .eq('user_id', user!.id);
       if (error) throw error;
       return (data || []) as Composicao[];
@@ -418,13 +419,17 @@ export default function Dashboard() {
           : `${volume.toFixed(0)} g`
         : `${volume} un`;
 
-      // Calcular custo teórico (para fallback)
+      // Calcular custo teórico (fallback) — aplica conversão de unidade insumo↔receita (kg↔g, l↔ml)
       const comps = composicoes.filter((c) => c.receita_id === r.id);
       let custoInsumos = 0;
+      const convMap: Record<string, number> = { 'kg->g': 1000, 'g->kg': 0.001, 'l->ml': 1000, 'ml->l': 0.001 };
       for (const c of comps) {
         const custoUn = c.insumo?.custo_unitario ?? 0;
         const fator = c.fator_rendimento || 1;
-        custoInsumos += (c.quantidade * custoUn) / fator;
+        const insumoUnit = (c.insumo?.unidade_medida ?? 'g') as 'g' | 'kg' | 'ml' | 'l' | 'un';
+        const receitaUnit = (c.unidade_medida ?? 'g') as 'g' | 'kg' | 'ml' | 'l' | 'un';
+        const conv = insumoUnit === receitaUnit ? 1 : (convMap[`${insumoUnit}->${receitaUnit}`] ?? 1);
+        custoInsumos += (c.quantidade * custoUn) / conv / fator;
       }
       const custoMaoDeObra = r.tempo_producao_minutos ? r.tempo_producao_minutos * custoMinuto : 0;
       const custoTotalReceita = custoInsumos + custoMaoDeObra;
