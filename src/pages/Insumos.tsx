@@ -234,9 +234,17 @@ function InsumoTable({ title, items, onEdit, onDelete }: {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="font-mono text-xs">
-                      {item.custo_unitario ? formatarCusto(item.custo_unitario) : '—'}/{item.unidade_medida}
-                    </Badge>
+                    {(() => {
+                      const unidadeBase: Record<string, string> = { kg: 'g', l: 'ml', g: 'g', ml: 'ml', un: 'un' };
+                      const fatorConversao: Record<string, number> = { kg: 1000, l: 1000, g: 1, ml: 1, un: 1 };
+                      const unidadeExibida = unidadeBase[item.unidade_medida];
+                      const custoNaBase = (item.custo_unitario ?? 0) / fatorConversao[item.unidade_medida];
+                      return (
+                        <Badge variant="outline" className="font-mono text-xs">
+                          {item.custo_unitario ? formatarCusto(custoNaBase) : '—'}/{unidadeExibida}
+                        </Badge>
+                      );
+                    })()}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
