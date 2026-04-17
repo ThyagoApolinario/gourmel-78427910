@@ -1,0 +1,1 @@
+DELETE FROM public.vendas WHERE canal_venda = 'QA E2E' AND user_id = 'afc96ee7-0fb3-49ef-9b15-f4bd08326177';
