@@ -77,18 +77,18 @@ export default function PontoEquilibrio() {
     enabled: allReceitaIds.length > 0,
   });
 
-  // Vendas in the month
+  // Vendas in the month — agora inclui kit_id, snapshot, taxa real
   const { data: vendas = [] } = useQuery({
     queryKey: ['vendas_pe', selectedMonth],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('vendas')
-        .select('receita_id, preco_venda, quantidade')
+        .select('receita_id, kit_id, preco_venda, quantidade, valor_liquido_real, custo_insumos_snapshot, taxa_aplicada')
         .eq('user_id', user!.id)
         .gte('data_venda', mesStart)
         .lte('data_venda', mesEnd);
       if (error) throw error;
-      return data;
+      return data as any[];
     },
     enabled: !!user,
   });
@@ -147,19 +147,78 @@ export default function PontoEquilibrio() {
   const impostos = config?.impostos ?? 5;
   const custoMinuto = config ? config.pro_labore / (config.horas_mes * 60) : 0;
 
-  // Receitas relevant to this month: assigned to this month OR have sales in this month
-  const receitaIdsComVendas = useMemo(() => new Set(vendas.map(v => v.receita_id)), [vendas]);
+  // Itens dos kits — para distribuir vendas de kits nas receitas componentes
+  const { data: kitItens = [] } = useQuery({
+    queryKey: ['kit_itens_pe', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('kit_itens')
+        .select('kit_id, receita_id, quantidade')
+        .eq('user_id', user!.id)
+        .eq('tipo_item', 'receita');
+      if (error) throw error;
+      return (data || []) as { kit_id: string; receita_id: string | null; quantidade: number }[];
+    },
+    enabled: !!user,
+  });
+
+  // Atribui cada venda à(s) receita(s) — distribui kits proporcionalmente nos componentes
+  type VendaAtribuida = {
+    receita_id: string;
+    quantidade: number;
+    faturamento: number;
+    lucroReal: number | null;
+  };
+  const vendasAtribuidas = useMemo<VendaAtribuida[]>(() => {
+    const itensPorKit = new Map<string, { receita_id: string; quantidade: number }[]>();
+    for (const ki of kitItens) {
+      if (!ki.receita_id) continue;
+      if (!itensPorKit.has(ki.kit_id)) itensPorKit.set(ki.kit_id, []);
+      itensPorKit.get(ki.kit_id)!.push({ receita_id: ki.receita_id, quantidade: Number(ki.quantidade) });
+    }
+    const out: VendaAtribuida[] = [];
+    for (const v of vendas) {
+      const fatBruto = Number(v.preco_venda) * Number(v.quantidade);
+      const liq = v.valor_liquido_real != null ? Number(v.valor_liquido_real) : null;
+      if (v.kit_id && itensPorKit.has(v.kit_id)) {
+        const itens = itensPorKit.get(v.kit_id)!;
+        const totalQtd = itens.reduce((s, i) => s + i.quantidade, 0);
+        if (totalQtd > 0) {
+          for (const it of itens) {
+            const peso = it.quantidade / totalQtd;
+            out.push({
+              receita_id: it.receita_id,
+              quantidade: Number(v.quantidade) * it.quantidade,
+              faturamento: fatBruto * peso,
+              lucroReal: liq != null ? liq * peso : null,
+            });
+          }
+        }
+      } else if (v.receita_id) {
+        out.push({
+          receita_id: v.receita_id,
+          quantidade: Number(v.quantidade),
+          faturamento: fatBruto,
+          lucroReal: liq,
+        });
+      }
+    }
+    return out;
+  }, [vendas, kitItens]);
+
+  const receitaIdsComVendas = useMemo(
+    () => new Set(vendasAtribuidas.map(v => v.receita_id)),
+    [vendasAtribuidas],
+  );
   const receitas = useMemo(() => {
     return allReceitas.filter(r => {
-      // Has sales in the selected month
       if (receitaIdsComVendas.has(r.id)) return true;
-      // Or is assigned to produce in this month
       if (r.mes_producao && r.mes_producao >= mesStart && r.mes_producao <= mesEnd) return true;
       return false;
     });
   }, [allReceitas, receitaIdsComVendas, mesStart, mesEnd]);
 
-  // Per-recipe breakdown
+  // Per-recipe breakdown — usa LUCRO REAL do snapshot quando disponível
   const receitaBreakdown = useMemo(() => {
     return receitas.map(r => {
       const comps = composicoes.filter(c => c.receita_id === r.id);
@@ -190,12 +249,29 @@ export default function PontoEquilibrio() {
       const rendimento = r.rendimento_quantidade ?? 1;
       const precoPorUn = precoTotal ? precoTotal / rendimento : null;
 
-      // Vendas do mês para esta receita
-      const vendasReceita = vendas.filter(v => v.receita_id === r.id);
+      const vendasReceita = vendasAtribuidas.filter(v => v.receita_id === r.id);
       const qtdVendida = vendasReceita.reduce((s, v) => s + v.quantidade, 0);
-      const faturamento = vendasReceita.reduce((s, v) => s + v.preco_venda * v.quantidade, 0);
-      const custoVendas = qtdVendida * (custoVariavel / rendimento);
-      const margemContrib = faturamento - custoVendas - (faturamento * (taxaCartao + impostos) / 100);
+      const faturamento = vendasReceita.reduce((s, v) => s + v.faturamento, 0);
+
+      // Margem de contribuição: prioriza lucro real (snapshot já desconta taxa real do método + custo do momento).
+      // Fallback: cálculo teórico apenas para vendas antigas sem snapshot.
+      let margemContrib = 0;
+      let faturamentoSemSnapshot = 0;
+      let qtdSemSnapshot = 0;
+      for (const v of vendasReceita) {
+        if (v.lucroReal != null) {
+          margemContrib += v.lucroReal;
+        } else {
+          faturamentoSemSnapshot += v.faturamento;
+          qtdSemSnapshot += v.quantidade;
+        }
+      }
+      if (qtdSemSnapshot > 0) {
+        const custoFallback = qtdSemSnapshot * (custoVariavel / rendimento);
+        margemContrib +=
+          faturamentoSemSnapshot - custoFallback -
+          (faturamentoSemSnapshot * (taxaCartao + impostos) / 100);
+      }
 
       return {
         id: r.id,
@@ -210,7 +286,7 @@ export default function PontoEquilibrio() {
         margemContrib,
       };
     });
-  }, [receitas, composicoes, vendas, config, taxaCartao, impostos, custoMinuto]);
+  }, [receitas, composicoes, vendasAtribuidas, config, taxaCartao, impostos, custoMinuto]);
 
   // Global totals
   const totals = useMemo(() => {
