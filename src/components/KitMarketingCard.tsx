@@ -140,20 +140,22 @@ FestivoTemplate.displayName = 'FestivoTemplate';
    TEMPLATE 2 — CLEAN (minimalista creme + verde sálvia)
    ============================================================ */
 const CleanTemplate = forwardRef<HTMLDivElement, TemplateProps>(
-  ({ nome, descricao, itens, preco, precoIndividual, economiaPct, brandName = 'Confeitaria' }, ref) => {
+  ({ nome, descricao, itens, preco, precoIndividual, economiaPct, brandName = 'Confeitaria', format }, ref) => {
     const allItens = itens.slice(0, 6);
+    const { width, height } = dimensions(format);
+    const isStory = format === 'story';
 
     return (
       <div
         ref={ref}
         style={{
-          width: 1080,
-          height: 1080,
+          width,
+          height,
           background: 'hsl(40, 35%, 97%)',
           fontFamily: '"Poppins", "Quicksand", sans-serif',
           color: 'hsl(140, 30%, 18%)',
           position: 'relative',
-          padding: 96,
+          padding: isStory ? '140px 96px' : 96,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
