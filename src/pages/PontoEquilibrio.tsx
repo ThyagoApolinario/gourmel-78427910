@@ -127,7 +127,23 @@ export default function PontoEquilibrio() {
     [custosFixos]
   );
 
-  const taxaCartao = config?.taxa_cartao ?? 5;
+  // Taxa padrão agora vem do método de pagamento marcado como padrão (não mais de config.taxa_cartao)
+  const { data: metodoPadrao } = useQuery({
+    queryKey: ['metodo_padrao_pe', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('metodos_pagamento')
+        .select('taxa_percentual')
+        .eq('user_id', user!.id)
+        .eq('is_padrao_precificacao', true)
+        .eq('ativo', true)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const taxaCartao = metodoPadrao?.taxa_percentual ?? 0;
   const impostos = config?.impostos ?? 5;
   const custoMinuto = config ? config.pro_labore / (config.horas_mes * 60) : 0;
 
