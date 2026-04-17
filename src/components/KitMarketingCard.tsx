@@ -235,21 +235,23 @@ CleanTemplate.displayName = 'CleanTemplate';
    TEMPLATE 3 — COLORIDO (vibrante e divertido)
    ============================================================ */
 const ColoridoTemplate = forwardRef<HTMLDivElement, TemplateProps>(
-  ({ nome, descricao, itens, preco, precoIndividual, economiaPct, brandName = 'Confeitaria' }, ref) => {
+  ({ nome, descricao, itens, preco, precoIndividual, economiaPct, brandName = 'Confeitaria', format }, ref) => {
     const allItens = itens.slice(0, 5);
+    const { width, height } = dimensions(format);
+    const isStory = format === 'story';
 
     return (
       <div
         ref={ref}
         style={{
-          width: 1080,
-          height: 1080,
+          width,
+          height,
           background: 'linear-gradient(135deg, hsl(340, 80%, 68%) 0%, hsl(40, 95%, 62%) 50%, hsl(160, 70%, 55%) 100%)',
           fontFamily: '"Poppins", "Quicksand", sans-serif',
           color: 'white',
           position: 'relative',
           overflow: 'hidden',
-          padding: 70,
+          padding: isStory ? '120px 70px' : 70,
           display: 'flex',
           flexDirection: 'column',
         }}
