@@ -15,8 +15,9 @@ import {
   Download, Share2, MessageCircle, Instagram, Copy, CheckCircle2, Sparkles,
 } from 'lucide-react';
 import { calcularKit, calcEconomia, type FinanceConfig } from '@/lib/calc-kit';
-import { KitMarketingCard } from './KitMarketingCard';
+import { KitMarketingCard, KIT_TEMPLATES, type KitTemplateId } from './KitMarketingCard';
 import { formatarCusto } from '@/lib/smart-units';
+import { cn } from '@/lib/utils';
 
 interface KitShareDialogProps {
   open: boolean;
@@ -31,6 +32,7 @@ export function KitShareDialog({ open, onOpenChange, kitId }: KitShareDialogProp
   const cardRef = useRef<HTMLDivElement>(null);
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [template, setTemplate] = useState<KitTemplateId>('festivo');
 
   // Config + método padrão (para calcular preço sugerido)
   const { data: config } = useQuery({
@@ -227,6 +229,30 @@ export function KitShareDialog({ open, onOpenChange, kitId }: KitShareDialogProp
           </div>
         ) : (
           <div className="space-y-4">
+            {/* Template selector */}
+            <div className="space-y-1.5">
+              <p className="text-xs font-medium text-muted-foreground">Estilo do card</p>
+              <div className="grid grid-cols-3 gap-1.5">
+                {KIT_TEMPLATES.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setTemplate(t.id)}
+                    className={cn(
+                      'flex flex-col items-center gap-0.5 rounded-lg border-2 p-2 text-center transition-all',
+                      template === t.id
+                        ? 'border-accent bg-accent/10 shadow-sm'
+                        : 'border-border hover:border-accent/40 hover:bg-muted/50'
+                    )}
+                  >
+                    <span className="text-lg leading-none">{t.emoji}</span>
+                    <span className="text-[11px] font-semibold leading-tight">{t.label}</span>
+                    <span className="text-[9px] text-muted-foreground leading-tight">{t.description}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Preview (scaled) */}
             <div className="rounded-xl overflow-hidden border-2 border-border shadow-md bg-muted">
               <div
@@ -246,6 +272,7 @@ export function KitShareDialog({ open, onOpenChange, kitId }: KitShareDialogProp
                 >
                   <KitMarketingCard
                     ref={cardRef}
+                    template={template}
                     nome={kitData.kit.nome}
                     descricao={kitData.kit.descricao}
                     itens={kitData.breakdown.itens.map((i) => ({
