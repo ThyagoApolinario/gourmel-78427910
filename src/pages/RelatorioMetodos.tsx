@@ -50,7 +50,7 @@ interface MetodoStats {
 }
 
 const fmtBRL = (v: number) =>
-  v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 });
+  v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtPct = (v: number) => `${v.toFixed(1)}%`;
 
 export default function RelatorioMetodos() {
