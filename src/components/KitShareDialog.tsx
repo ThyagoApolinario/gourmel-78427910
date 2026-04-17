@@ -15,7 +15,10 @@ import {
   Download, Share2, MessageCircle, Instagram, Copy, CheckCircle2, Sparkles,
 } from 'lucide-react';
 import { calcularKit, calcEconomia, type FinanceConfig } from '@/lib/calc-kit';
-import { KitMarketingCard, KIT_TEMPLATES, type KitTemplateId } from './KitMarketingCard';
+import {
+  KitMarketingCard, KIT_TEMPLATES, KIT_FORMATS,
+  type KitTemplateId, type KitFormat,
+} from './KitMarketingCard';
 import { formatarCusto } from '@/lib/smart-units';
 import { cn } from '@/lib/utils';
 
@@ -34,22 +37,27 @@ export function KitShareDialog({ open, onOpenChange, kitId }: KitShareDialogProp
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [template, setTemplate] = useState<KitTemplateId>('festivo');
+  const [format, setFormat] = useState<KitFormat>('square');
   const [previewScale, setPreviewScale] = useState(0.3);
 
-  // Compute scale dynamically so the 1080×1080 card always fits the modal width
+  const cardDims = format === 'story'
+    ? { width: 1080, height: 1920 }
+    : { width: 1080, height: 1080 };
+
+  // Compute scale dynamically so the card always fits the modal width
   useLayoutEffect(() => {
     if (!open) return;
     const el = previewWrapRef.current;
     if (!el) return;
     const update = () => {
       const w = el.getBoundingClientRect().width;
-      if (w > 0) setPreviewScale(w / 1080);
+      if (w > 0) setPreviewScale(w / cardDims.width);
     };
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [open, kitId]);
+  }, [open, kitId, format, cardDims.width]);
 
   // Config + método padrão (para calcular preço sugerido)
   const { data: config } = useQuery({
