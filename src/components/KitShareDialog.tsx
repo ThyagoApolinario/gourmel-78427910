@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toPng } from 'html-to-image';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,9 +30,26 @@ export function KitShareDialog({ open, onOpenChange, kitId }: KitShareDialogProp
   const { profile } = useProfile();
   const { toast } = useToast();
   const cardRef = useRef<HTMLDivElement>(null);
+  const previewWrapRef = useRef<HTMLDivElement>(null);
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [template, setTemplate] = useState<KitTemplateId>('festivo');
+  const [previewScale, setPreviewScale] = useState(0.3);
+
+  // Compute scale dynamically so the 1080×1080 card always fits the modal width
+  useLayoutEffect(() => {
+    if (!open) return;
+    const el = previewWrapRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = el.getBoundingClientRect().width;
+      if (w > 0) setPreviewScale(w / 1080);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [open, kitId]);
 
   // Config + método padrão (para calcular preço sugerido)
   const { data: config } = useQuery({
