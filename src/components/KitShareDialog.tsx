@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
-  Download, Share2, MessageCircle, Instagram, Mail, Copy, CheckCircle2, Sparkles,
+  Download, Share2, MessageCircle, Instagram, Copy, CheckCircle2, Sparkles,
 } from 'lucide-react';
 import { calcularKit, calcEconomia, type FinanceConfig } from '@/lib/calc-kit';
 import { KitMarketingCard } from './KitMarketingCard';
@@ -177,14 +177,6 @@ export function KitShareDialog({ open, onOpenChange, kitId }: KitShareDialogProp
     });
   };
 
-  const shareEmail = () => {
-    if (!kitData) return;
-    const { kit } = kitData;
-    const subject = `Confira nosso ${kit.nome}!`;
-    const body = `${buildMessage()}\n\n(Baixe a imagem do kit pelo botão abaixo e anexe ao e-mail)`;
-    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  };
-
   const copyMessage = async () => {
     await navigator.clipboard.writeText(buildMessage());
     setCopied(true);
@@ -288,7 +280,7 @@ export function KitShareDialog({ open, onOpenChange, kitId }: KitShareDialogProp
             )}
 
             {/* Specific channel buttons */}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <Button
                 variant="outline"
                 onClick={shareWhatsapp}
@@ -306,15 +298,6 @@ export function KitShareDialog({ open, onOpenChange, kitId }: KitShareDialogProp
               >
                 <Instagram className="h-5 w-5" />
                 <span className="text-[11px]">Instagram</span>
-              </Button>
-              <Button
-                variant="outline"
-                onClick={shareEmail}
-                disabled={generating}
-                className="flex flex-col h-auto py-3 gap-1 border-primary/40 hover:bg-primary/5 hover:text-primary"
-              >
-                <Mail className="h-5 w-5" />
-                <span className="text-[11px]">E-mail</span>
               </Button>
             </div>
 
