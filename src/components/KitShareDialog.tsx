@@ -123,8 +123,8 @@ export function KitShareDialog({ open, onOpenChange, kitId }: KitShareDialogProp
       const dataUrl = await toPng(cardRef.current, {
         cacheBust: true,
         pixelRatio: 1,
-        width: 1080,
-        height: 1080,
+        width: cardDims.width,
+        height: cardDims.height,
       });
       const res = await fetch(dataUrl);
       return await res.blob();
