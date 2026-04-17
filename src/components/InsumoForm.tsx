@@ -152,15 +152,27 @@ export function InsumoForm({ onSubmit, initialData, loading, onCancel }: InsumoF
             </div>
           </div>
 
-          {preco > 0 && peso > 0 && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
-              <Calculator className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">Custo unitário:</span>
-              <Badge variant="secondary" className="text-sm">
-                {formatarCusto(custoUnitario)} / {form.unidade_medida}
-              </Badge>
-            </div>
-          )}
+          {preco > 0 && peso > 0 && (() => {
+            // custo_unitario é sempre na unidade base (g, ml, un) — converte para exibição correta
+            const unidadeBase: Record<string, string> = { kg: 'g', l: 'ml', g: 'g', ml: 'ml', un: 'un' };
+            const fatorConversao: Record<string, number> = { kg: 1000, l: 1000, g: 1, ml: 1, un: 1 };
+            const unidadeExibida = unidadeBase[form.unidade_medida];
+            const custoNaBase = custoUnitario / fatorConversao[form.unidade_medida];
+            return (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
+                <Calculator className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Custo unitário:</span>
+                <Badge variant="secondary" className="text-sm">
+                  {formatarCusto(custoNaBase)} / {unidadeExibida}
+                </Badge>
+                {form.unidade_medida !== unidadeExibida && (
+                  <span className="text-xs text-muted-foreground">
+                    (base de cálculo em {unidadeExibida})
+                  </span>
+                )}
+              </div>
+            );
+          })()}
 
           <div className="flex gap-2 pt-2">
             <Button type="submit" disabled={loading} className="flex-1">
