@@ -15,7 +15,10 @@ import {
   Download, Share2, MessageCircle, Instagram, Copy, CheckCircle2, Sparkles,
 } from 'lucide-react';
 import { calcularKit, calcEconomia, type FinanceConfig } from '@/lib/calc-kit';
-import { KitMarketingCard, KIT_TEMPLATES, type KitTemplateId } from './KitMarketingCard';
+import {
+  KitMarketingCard, KIT_TEMPLATES, KIT_FORMATS,
+  type KitTemplateId, type KitFormat,
+} from './KitMarketingCard';
 import { formatarCusto } from '@/lib/smart-units';
 import { cn } from '@/lib/utils';
 
@@ -34,22 +37,27 @@ export function KitShareDialog({ open, onOpenChange, kitId }: KitShareDialogProp
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [template, setTemplate] = useState<KitTemplateId>('festivo');
+  const [format, setFormat] = useState<KitFormat>('square');
   const [previewScale, setPreviewScale] = useState(0.3);
 
-  // Compute scale dynamically so the 1080×1080 card always fits the modal width
+  const cardDims = format === 'story'
+    ? { width: 1080, height: 1920 }
+    : { width: 1080, height: 1080 };
+
+  // Compute scale dynamically so the card always fits the modal width
   useLayoutEffect(() => {
     if (!open) return;
     const el = previewWrapRef.current;
     if (!el) return;
     const update = () => {
       const w = el.getBoundingClientRect().width;
-      if (w > 0) setPreviewScale(w / 1080);
+      if (w > 0) setPreviewScale(w / cardDims.width);
     };
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [open, kitId]);
+  }, [open, kitId, format, cardDims.width]);
 
   // Config + método padrão (para calcular preço sugerido)
   const { data: config } = useQuery({
@@ -115,8 +123,8 @@ export function KitShareDialog({ open, onOpenChange, kitId }: KitShareDialogProp
       const dataUrl = await toPng(cardRef.current, {
         cacheBust: true,
         pixelRatio: 1,
-        width: 1080,
-        height: 1080,
+        width: cardDims.width,
+        height: cardDims.height,
       });
       const res = await fetch(dataUrl);
       return await res.blob();
@@ -270,38 +278,80 @@ export function KitShareDialog({ open, onOpenChange, kitId }: KitShareDialogProp
               </div>
             </div>
 
-            {/* Preview (scaled) */}
-            <div
-              ref={previewWrapRef}
-              className="rounded-xl overflow-hidden border-2 border-border shadow-md bg-muted relative w-full"
-              style={{ aspectRatio: '1 / 1' }}
-            >
+            {/* Format selector */}
+            <div className="space-y-1.5">
+              <p className="text-xs font-medium text-muted-foreground">Formato</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {KIT_FORMATS.map((f) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => setFormat(f.id)}
+                    className={cn(
+                      'flex items-center gap-2 rounded-lg border-2 p-2 transition-all',
+                      format === f.id
+                        ? 'border-accent bg-accent/10 shadow-sm'
+                        : 'border-border hover:border-accent/40 hover:bg-muted/50'
+                    )}
+                  >
+                    {/* Mini icon showing aspect */}
+                    <div
+                      className={cn(
+                        'shrink-0 border-2 rounded-sm',
+                        format === f.id ? 'border-accent' : 'border-muted-foreground/40'
+                      )}
+                      style={{
+                        width: f.id === 'story' ? 14 : 22,
+                        height: f.id === 'story' ? 22 : 22,
+                      }}
+                    />
+                    <div className="text-left min-w-0">
+                      <div className="text-[12px] font-semibold leading-tight">{f.label}</div>
+                      <div className="text-[9px] text-muted-foreground leading-tight">{f.sublabel}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Preview (scaled) — wrap centers vertical story so it doesn't dominate the modal */}
+            <div className={format === 'story' ? 'flex justify-center' : ''}>
               <div
+                ref={previewWrapRef}
+                className="rounded-xl overflow-hidden border-2 border-border shadow-md bg-muted relative"
                 style={{
-                  transform: `scale(${previewScale})`,
-                  transformOrigin: 'top left',
-                  width: 1080,
-                  height: 1080,
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
+                  width: format === 'story' ? '60%' : '100%',
+                  aspectRatio: format === 'story' ? '9 / 16' : '1 / 1',
                 }}
               >
-                <KitMarketingCard
-                  ref={cardRef}
-                  template={template}
-                  nome={kitData.kit.nome}
-                  descricao={kitData.kit.descricao}
-                  itens={kitData.breakdown.itens.map((i) => ({
-                    nome: i.nome,
-                    tipo: i.tipo,
-                    quantidade: i.quantidade,
-                  }))}
-                  preco={kitData.precoFinal}
-                  precoIndividual={kitData.breakdown.somaPrecosIndividuais}
-                  economiaPct={kitData.economia}
-                  brandName={brandName}
-                />
+                <div
+                  style={{
+                    transform: `scale(${previewScale})`,
+                    transformOrigin: 'top left',
+                    width: cardDims.width,
+                    height: cardDims.height,
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                  }}
+                >
+                  <KitMarketingCard
+                    ref={cardRef}
+                    template={template}
+                    format={format}
+                    nome={kitData.kit.nome}
+                    descricao={kitData.kit.descricao}
+                    itens={kitData.breakdown.itens.map((i) => ({
+                      nome: i.nome,
+                      tipo: i.tipo,
+                      quantidade: i.quantidade,
+                    }))}
+                    preco={kitData.precoFinal}
+                    precoIndividual={kitData.breakdown.somaPrecosIndividuais}
+                    economiaPct={kitData.economia}
+                    brandName={brandName}
+                  />
+                </div>
               </div>
             </div>
 

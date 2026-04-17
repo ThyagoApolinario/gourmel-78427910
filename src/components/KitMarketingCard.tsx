@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import { formatarCusto } from '@/lib/smart-units';
 
 export type KitTemplateId = 'festivo' | 'clean' | 'colorido';
+export type KitFormat = 'square' | 'story';
 
 export interface KitTemplateOption {
   id: KitTemplateId;
@@ -16,6 +17,11 @@ export const KIT_TEMPLATES: KitTemplateOption[] = [
   { id: 'colorido', label: 'Colorido', description: 'Vibrante e divertido', emoji: '🌈' },
 ];
 
+export const KIT_FORMATS: { id: KitFormat; label: string; sublabel: string; width: number; height: number }[] = [
+  { id: 'square', label: 'Quadrado', sublabel: '1080×1080 · Feed', width: 1080, height: 1080 },
+  { id: 'story', label: 'Story', sublabel: '1080×1920 · Stories', width: 1080, height: 1920 },
+];
+
 export interface KitMarketingCardProps {
   nome: string;
   descricao?: string | null;
@@ -25,44 +31,50 @@ export interface KitMarketingCardProps {
   economiaPct: number;
   brandName?: string;
   template?: KitTemplateId;
+  format?: KitFormat;
 }
 
 /**
  * Visual card for sharing kits on social media.
  * Rendered offscreen and converted to PNG via html-to-image.
- * Designed at 1080×1080 (Instagram square).
+ * Supports two formats: 1080×1080 (Instagram square) and 1080×1920 (Stories).
  */
 export const KitMarketingCard = forwardRef<HTMLDivElement, KitMarketingCardProps>(
-  ({ template = 'festivo', ...props }, ref) => {
-    if (template === 'clean') return <CleanTemplate ref={ref} {...props} />;
-    if (template === 'colorido') return <ColoridoTemplate ref={ref} {...props} />;
-    return <FestivoTemplate ref={ref} {...props} />;
+  ({ template = 'festivo', format = 'square', ...props }, ref) => {
+    if (template === 'clean') return <CleanTemplate ref={ref} format={format} {...props} />;
+    if (template === 'colorido') return <ColoridoTemplate ref={ref} format={format} {...props} />;
+    return <FestivoTemplate ref={ref} format={format} {...props} />;
   },
 );
 KitMarketingCard.displayName = 'KitMarketingCard';
 
-type TemplateProps = Omit<KitMarketingCardProps, 'template'>;
+type TemplateProps = Omit<KitMarketingCardProps, 'template'> & { format: KitFormat };
+
+const dimensions = (format: KitFormat) =>
+  format === 'story' ? { width: 1080, height: 1920 } : { width: 1080, height: 1080 };
 
 /* ============================================================
    TEMPLATE 1 — FESTIVO (verde sálvia + terracota)
    ============================================================ */
 const FestivoTemplate = forwardRef<HTMLDivElement, TemplateProps>(
-  ({ nome, descricao, itens, preco, precoIndividual, economiaPct, brandName = 'Confeitaria' }, ref) => {
+  ({ nome, descricao, itens, preco, precoIndividual, economiaPct, brandName = 'Confeitaria', format }, ref) => {
     const itensReceitas = itens.filter((i) => i.tipo === 'receita');
     const itensInsumos = itens.filter((i) => i.tipo === 'insumo');
+    const { width, height } = dimensions(format);
+    const isStory = format === 'story';
 
     return (
       <div
         ref={ref}
         style={{
-          width: 1080,
-          height: 1080,
+          width,
+          height,
           background: 'linear-gradient(135deg, hsl(140, 25%, 38%) 0%, hsl(140, 30%, 28%) 100%)',
           fontFamily: '"Poppins", "Quicksand", sans-serif',
           color: 'hsl(40, 30%, 96%)',
           position: 'relative',
           overflow: 'hidden',
-          padding: 80,
+          padding: isStory ? '120px 80px' : 80,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
@@ -128,20 +140,22 @@ FestivoTemplate.displayName = 'FestivoTemplate';
    TEMPLATE 2 — CLEAN (minimalista creme + verde sálvia)
    ============================================================ */
 const CleanTemplate = forwardRef<HTMLDivElement, TemplateProps>(
-  ({ nome, descricao, itens, preco, precoIndividual, economiaPct, brandName = 'Confeitaria' }, ref) => {
+  ({ nome, descricao, itens, preco, precoIndividual, economiaPct, brandName = 'Confeitaria', format }, ref) => {
     const allItens = itens.slice(0, 6);
+    const { width, height } = dimensions(format);
+    const isStory = format === 'story';
 
     return (
       <div
         ref={ref}
         style={{
-          width: 1080,
-          height: 1080,
+          width,
+          height,
           background: 'hsl(40, 35%, 97%)',
           fontFamily: '"Poppins", "Quicksand", sans-serif',
           color: 'hsl(140, 30%, 18%)',
           position: 'relative',
-          padding: 96,
+          padding: isStory ? '140px 96px' : 96,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
@@ -221,21 +235,23 @@ CleanTemplate.displayName = 'CleanTemplate';
    TEMPLATE 3 — COLORIDO (vibrante e divertido)
    ============================================================ */
 const ColoridoTemplate = forwardRef<HTMLDivElement, TemplateProps>(
-  ({ nome, descricao, itens, preco, precoIndividual, economiaPct, brandName = 'Confeitaria' }, ref) => {
+  ({ nome, descricao, itens, preco, precoIndividual, economiaPct, brandName = 'Confeitaria', format }, ref) => {
     const allItens = itens.slice(0, 5);
+    const { width, height } = dimensions(format);
+    const isStory = format === 'story';
 
     return (
       <div
         ref={ref}
         style={{
-          width: 1080,
-          height: 1080,
+          width,
+          height,
           background: 'linear-gradient(135deg, hsl(340, 80%, 68%) 0%, hsl(40, 95%, 62%) 50%, hsl(160, 70%, 55%) 100%)',
           fontFamily: '"Poppins", "Quicksand", sans-serif',
           color: 'white',
           position: 'relative',
           overflow: 'hidden',
-          padding: 70,
+          padding: isStory ? '120px 70px' : 70,
           display: 'flex',
           flexDirection: 'column',
         }}
