@@ -4,7 +4,7 @@
 
 <h1 align="center">Gourmel Pet</h1>
 <p align="center">
-  Sistema web para apoiar a operação de uma <strong>confeitaria canina natural</strong>, com foco em organização, controle e visão de negócio.
+  Plataforma web para apoiar a operação, organização e visão de negócio de uma <strong>confeitaria canina natural</strong>.
 </p>
 
 <p align="center">
@@ -17,9 +17,11 @@
 
 ---
 
-## Visão geral
+## O que é o Gourmel Pet
 
-O **Gourmel Pet** reúne em um único lugar os fluxos centrais do negócio, ajudando a acompanhar a produção, organizar receitas, registrar vendas e visualizar indicadores importantes para a tomada de decisão.
+O **Gourmel Pet** foi pensado para concentrar os fluxos centrais do negócio em um só lugar, facilitando a rotina operacional e trazendo mais clareza para decisões do dia a dia.
+
+A proposta do projeto é transformar uma operação artesanal em uma operação mais organizada, previsível e acompanhável, com apoio digital para gestão de insumos, receitas, kits, vendas e indicadores.
 
 ### Links principais
 
@@ -28,34 +30,49 @@ O **Gourmel Pet** reúne em um único lugar os fluxos centrais do negócio, ajud
 
 ---
 
-## Funcionalidades principais
+## O que o produto entrega hoje
 
 <p align="center">
   <img src="./docs/gourmel-funcionalidades.svg" alt="Funcionalidades do Gourmel Pet" width="100%" />
 </p>
 
-### Módulos do sistema
+### Funcionalidades principais
 
-- **Insumos**  
-  Cadastro e controle dos ingredientes usados no dia a dia.
+- **Gestão de insumos** para acompanhar os ingredientes da operação
+- **Receitas e composição** para organizar produtos e estrutura produtiva
+- **Kits** para ofertas e combinações de venda
+- **Registro de vendas** para acompanhar o movimento do negócio
+- **Relatórios e indicadores** para leitura de desempenho e apoio à decisão
+- **Custos fixos e ponto de equilíbrio** para visão financeira mais clara
+- **Dashboard** com visão consolidada da operação
+- **Perfil, ajuda e configurações** para suporte ao uso da plataforma
 
-- **Receitas**  
-  Estruturação dos produtos, composição e apoio no cálculo operacional.
+---
 
-- **Kits**  
-  Organização de combinações e ofertas de produtos.
+## Screenshots reais da aplicação
 
-- **Vendas**  
-  Registro do movimento comercial e acompanhamento da operação.
+<table>
+  <tr>
+    <td width="65%" valign="top">
+      <img src="./docs/screenshots/gourmel-desktop.png" alt="Tela desktop do Gourmel Pet" width="100%" />
+    </td>
+    <td width="35%" valign="top">
+      <img src="./docs/screenshots/gourmel-mobile.png" alt="Tela mobile do Gourmel Pet" width="100%" />
+    </td>
+  </tr>
+</table>
 
-- **Relatórios e indicadores**  
-  Relatório mensal, métodos, custos fixos e ponto de equilíbrio.
+As capturas acima mostram a interface real publicada do projeto, em visualização desktop e mobile.
 
-- **Dashboard**  
-  Visão consolidada do negócio para leitura rápida dos dados principais.
+---
 
-- **Suporte à operação**  
-  Perfil, ajuda, configurações e autenticação integrada.
+## Benefícios do projeto
+
+- centraliza informações importantes da operação
+- reduz dispersão entre planilhas, anotações e controles paralelos
+- melhora a leitura dos números do negócio
+- ajuda na consistência de processos e na tomada de decisão
+- cria uma base digital para evolução futura do produto
 
 ---
 
@@ -66,6 +83,32 @@ O **Gourmel Pet** reúne em um único lugar os fluxos centrais do negócio, ajud
 - **TypeScript**
 - **Supabase**
 - **Tailwind CSS**
+
+---
+
+## Roadmap
+
+### Curto prazo
+
+- melhorar o fluxo de entrada e onboarding do usuário
+- evoluir a apresentação dos indicadores mais importantes
+- refinar experiência mobile e responsividade
+- melhorar a comunicação visual das áreas centrais do sistema
+
+### Próximos passos de produto
+
+- painel executivo mais orientado a decisão
+- histórico e inteligência de vendas
+- evolução de relatórios e exportações
+- organização mais avançada de receitas, kits e custos
+- melhorias de usabilidade para operação diária
+
+### Evoluções futuras
+
+- domínio personalizado
+- camadas extras de automação
+- permissões e perfis de acesso mais granulares
+- integrações adicionais para apoiar expansão do negócio
 
 ---
 
