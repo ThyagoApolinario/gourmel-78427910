@@ -1,0 +1,49 @@
+<svg width="1280" height="760" viewBox="0 0 1280 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="760" rx="32" fill="#FFFDF8"/>
+  <text x="78" y="92" fill="#431407" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="800">Funcionalidades do Gourmel Pet</text>
+  <text x="78" y="134" fill="#78350F" font-family="Segoe UI, Arial, sans-serif" font-size="24">Visão geral dos módulos centrais para a operação e gestão do negócio.</text>
+
+  <g>
+    <rect x="78" y="190" width="350" height="180" rx="24" fill="#FFFFFF" stroke="#FED7AA"/>
+    <text x="112" y="248" fill="#9A3412" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="800">📦 Insumos</text>
+    <text x="112" y="292" fill="#7C2D12" font-family="Segoe UI, Arial, sans-serif" font-size="22">Cadastro e controle dos ingredientes</text>
+    <text x="112" y="326" fill="#7C2D12" font-family="Segoe UI, Arial, sans-serif" font-size="22">usados na produção.</text>
+  </g>
+
+  <g>
+    <rect x="465" y="190" width="350" height="180" rx="24" fill="#FFFFFF" stroke="#FCD34D"/>
+    <text x="499" y="248" fill="#92400E" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="800">🧁 Receitas</text>
+    <text x="499" y="292" fill="#7C2D12" font-family="Segoe UI, Arial, sans-serif" font-size="22">Estruturação dos produtos, preparo</text>
+    <text x="499" y="326" fill="#7C2D12" font-family="Segoe UI, Arial, sans-serif" font-size="22">e composição de custos.</text>
+  </g>
+
+  <g>
+    <rect x="852" y="190" width="350" height="180" rx="24" fill="#FFFFFF" stroke="#FDBA74"/>
+    <text x="886" y="248" fill="#9A3412" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="800">🎁 Kits</text>
+    <text x="886" y="292" fill="#7C2D12" font-family="Segoe UI, Arial, sans-serif" font-size="22">Montagem de ofertas e combinações</text>
+    <text x="886" y="326" fill="#7C2D12" font-family="Segoe UI, Arial, sans-serif" font-size="22">de produtos para venda.</text>
+  </g>
+
+  <g>
+    <rect x="78" y="414" width="350" height="180" rx="24" fill="#FFFFFF" stroke="#FCA5A5"/>
+    <text x="112" y="472" fill="#9A3412" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="800">💸 Vendas</text>
+    <text x="112" y="516" fill="#7C2D12" font-family="Segoe UI, Arial, sans-serif" font-size="22">Registro do movimento comercial</text>
+    <text x="112" y="550" fill="#7C2D12" font-family="Segoe UI, Arial, sans-serif" font-size="22">e acompanhamento da operação.</text>
+  </g>
+
+  <g>
+    <rect x="465" y="414" width="350" height="180" rx="24" fill="#FFFFFF" stroke="#86EFAC"/>
+    <text x="499" y="472" fill="#166534" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="800">📊 Relatórios</text>
+    <text x="499" y="516" fill="#14532D" font-family="Segoe UI, Arial, sans-serif" font-size="22">Relatório mensal, métodos, custos</text>
+    <text x="499" y="550" fill="#14532D" font-family="Segoe UI, Arial, sans-serif" font-size="22">fixos e ponto de equilíbrio.</text>
+  </g>
+
+  <g>
+    <rect x="852" y="414" width="350" height="180" rx="24" fill="#FFFFFF" stroke="#93C5FD"/>
+    <text x="886" y="472" fill="#1D4ED8" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="800">📈 Dashboard</text>
+    <text x="886" y="516" fill="#1E3A8A" font-family="Segoe UI, Arial, sans-serif" font-size="22">Visão consolidada para apoiar</text>
+    <text x="886" y="550" fill="#1E3A8A" font-family="Segoe UI, Arial, sans-serif" font-size="22">decisões do negócio.</text>
+  </g>
+
+  <text x="78" y="678" fill="#78350F" font-family="Segoe UI, Arial, sans-serif" font-size="24">Também inclui perfil, ajuda, configurações e autenticação integrada via Supabase.</text>
+</svg>
