@@ -24,6 +24,7 @@ import NotFound from "./pages/NotFound";
 import { useSessionGuard } from "./hooks/useSessionGuard";
 
 const queryClient = new QueryClient();
+const routerBasename = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 function ProtectedRoutes() {
   const { user, loading } = useAuth();
@@ -64,7 +65,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename={routerBasename || undefined}>
         <AuthProvider>
           <ProfileProvider>
             <Routes>
