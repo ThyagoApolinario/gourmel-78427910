@@ -4,7 +4,7 @@
 
 <h1 align="center">Gourmel Pet</h1>
 <p align="center">
-  Plataforma web para apoiar a operação, organização e visão de negócio de uma <strong>confeitaria canina natural</strong>.
+  Plataforma digital para apoiar a gestão, organização e crescimento de uma operação de <strong>confeitaria canina natural</strong>.
 </p>
 
 <p align="center">
@@ -17,11 +17,11 @@
 
 ---
 
-## O que é o Gourmel Pet
+## Visão do projeto
 
-O **Gourmel Pet** foi pensado para concentrar os fluxos centrais do negócio em um só lugar, facilitando a rotina operacional e trazendo mais clareza para decisões do dia a dia.
+O **Gourmel Pet** nasce como uma base digital para profissionalizar a operação de uma confeitaria canina natural, trazendo mais organização, previsibilidade e inteligência para a rotina do negócio.
 
-A proposta do projeto é transformar uma operação artesanal em uma operação mais organizada, previsível e acompanhável, com apoio digital para gestão de insumos, receitas, kits, vendas e indicadores.
+Mais do que um sistema de controle, a proposta é criar uma plataforma que conecte operação, gestão e visão estratégica, permitindo crescimento com mais consistência.
 
 ### Links principais
 
@@ -30,22 +30,54 @@ A proposta do projeto é transformar uma operação artesanal em uma operação 
 
 ---
 
-## O que o produto entrega hoje
+## Oportunidade
+
+Negócios artesanais e especializados costumam crescer apoiados em processos manuais, planilhas dispersas e controles operacionais fragmentados. Isso gera retrabalho, reduz visibilidade financeira e dificulta decisões mais rápidas.
+
+O Gourmel Pet se posiciona como um passo importante nessa profissionalização, estruturando dados e processos que hoje são críticos para a eficiência e a expansão do negócio.
+
+---
+
+## Proposta de valor
+
+O projeto busca entregar valor em três camadas principais:
+
+### 1. Eficiência operacional
+
+- melhor organização de insumos, receitas, kits e vendas
+- redução de controles paralelos e dispersos
+- maior clareza para a rotina do negócio
+
+### 2. Gestão e decisão
+
+- leitura mais clara de custos, relatórios e ponto de equilíbrio
+- acompanhamento de indicadores centrais da operação
+- base melhor para decisões comerciais e operacionais
+
+### 3. Crescimento estruturado
+
+- digitalização da operação
+- base para novas funcionalidades e integrações
+- possibilidade de evolução para uma plataforma mais robusta no futuro
+
+---
+
+## O que já existe no produto
 
 <p align="center">
   <img src="./docs/gourmel-funcionalidades.svg" alt="Funcionalidades do Gourmel Pet" width="100%" />
 </p>
 
-### Funcionalidades principais
+### Funcionalidades atuais
 
-- **Gestão de insumos** para acompanhar os ingredientes da operação
-- **Receitas e composição** para organizar produtos e estrutura produtiva
-- **Kits** para ofertas e combinações de venda
-- **Registro de vendas** para acompanhar o movimento do negócio
-- **Relatórios e indicadores** para leitura de desempenho e apoio à decisão
-- **Custos fixos e ponto de equilíbrio** para visão financeira mais clara
-- **Dashboard** com visão consolidada da operação
-- **Perfil, ajuda e configurações** para suporte ao uso da plataforma
+- **Gestão de insumos**
+- **Receitas e composição**
+- **Kits e estrutura de oferta**
+- **Registro de vendas**
+- **Relatórios e indicadores**
+- **Custos fixos e ponto de equilíbrio**
+- **Dashboard operacional**
+- **Perfil, ajuda e configurações**
 
 ---
 
@@ -62,53 +94,55 @@ A proposta do projeto é transformar uma operação artesanal em uma operação 
   </tr>
 </table>
 
-As capturas acima mostram a interface real publicada do projeto, em visualização desktop e mobile.
+As capturas acima mostram a interface real publicada do projeto, atualmente na etapa de acesso/autenticação da plataforma.
 
 ---
 
-## Benefícios do projeto
+## Por que isso importa para parceiro, investidor ou aliado comercial
 
-- centraliza informações importantes da operação
-- reduz dispersão entre planilhas, anotações e controles paralelos
-- melhora a leitura dos números do negócio
-- ajuda na consistência de processos e na tomada de decisão
-- cria uma base digital para evolução futura do produto
+O Gourmel Pet já demonstra alguns sinais importantes de maturidade de produto:
+
+- existe uma **estrutura funcional real**, não apenas uma ideia conceitual
+- há uma **base digital publicada**, navegável e versionada
+- o projeto já está organizado para continuar evoluindo com agilidade
+- o problema atacado é concreto: operação, gestão e visibilidade do negócio
+
+Para parceiros e apoiadores, isso significa olhar para um projeto que já saiu do campo abstrato e entrou em uma fase de consolidação de produto.
 
 ---
 
-## Stack
+## Roadmap estratégico
+
+### Curto prazo
+
+- refinar o fluxo de acesso e onboarding
+- melhorar a experiência visual e a comunicação do produto
+- evoluir indicadores essenciais da operação
+- aprimorar usabilidade mobile
+
+### Médio prazo
+
+- expandir relatórios e visão executiva
+- fortalecer apoio à decisão comercial
+- evoluir gestão de receitas, kits e custos
+- ampliar a robustez operacional da plataforma
+
+### Longo prazo
+
+- domínio próprio e posicionamento mais forte de marca
+- automações e integrações adicionais
+- camadas mais avançadas de inteligência de negócio
+- expansão do produto para uma operação mais escalável
+
+---
+
+## Base tecnológica
 
 - **React**
 - **Vite**
 - **TypeScript**
 - **Supabase**
 - **Tailwind CSS**
-
----
-
-## Roadmap
-
-### Curto prazo
-
-- melhorar o fluxo de entrada e onboarding do usuário
-- evoluir a apresentação dos indicadores mais importantes
-- refinar experiência mobile e responsividade
-- melhorar a comunicação visual das áreas centrais do sistema
-
-### Próximos passos de produto
-
-- painel executivo mais orientado a decisão
-- histórico e inteligência de vendas
-- evolução de relatórios e exportações
-- organização mais avançada de receitas, kits e custos
-- melhorias de usabilidade para operação diária
-
-### Evoluções futuras
-
-- domínio personalizado
-- camadas extras de automação
-- permissões e perfis de acesso mais granulares
-- integrações adicionais para apoiar expansão do negócio
 
 ---
 
