@@ -156,6 +156,18 @@ Este projeto está:
 
 ---
 
+## Licenciamento
+
+Este projeto é **proprietário**.
+
+- **Todos os direitos reservados** a Thyago Apolinário
+- não é permitido usar, copiar, modificar, redistribuir ou criar derivados sem autorização expressa por escrito
+- a disponibilização pública do repositório não representa concessão de licença de uso
+
+Consulte o arquivo `LICENSE` para os termos completos.
+
+---
+
 ## Observação importante
 
 Este repositório está conectado ao Lovable. Para evitar problemas de sincronização, o ideal é **não renomear nem mover este repositório**.
