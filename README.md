@@ -161,8 +161,9 @@ Este projeto está:
 Este projeto é **proprietário**.
 
 - **Todos os direitos reservados** a Thyago Apolinário
-- não é permitido usar, copiar, modificar, redistribuir ou criar derivados sem autorização expressa por escrito
-- a disponibilização pública do repositório não representa concessão de licença de uso
+- **nenhum direito de uso é concedido** sem autorização prévia e expressa por escrito
+- é vedado usar, copiar, modificar, redistribuir, sublicenciar, comercializar ou criar derivados sem permissão formal
+- a disponibilização pública do repositório **não** representa concessão de licença, autorização de exploração ou cessão de direitos
 
 Consulte o arquivo `LICENSE` para os termos completos.
 
